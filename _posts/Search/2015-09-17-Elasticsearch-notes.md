@@ -182,6 +182,7 @@ curl -XPOST http://localhost:9200/index/news/5 -d '{"content":"干了6年都不�
 
 查询
 query
+
 ```
 http://172.16.82.188:9200/index/news/_search
 GET
@@ -196,6 +197,7 @@ GET
 }
 ```
 term
+
 ```
 GET 
 {"query" : { "term" : { "content" : "冯" }}}
