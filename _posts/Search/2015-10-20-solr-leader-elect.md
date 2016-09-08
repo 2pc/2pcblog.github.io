@@ -11,6 +11,7 @@ SolrCloud 领导选举，最小seq,这点有点同Kafka seq(0)
 主要有两部分，一个是集群的leader选举过程，一个是collection的shard的leader选举过程
 
 集群的leader选举
+
 >
 1.主要相关的类：OverseerElectionContext
 2.相关节点：/overseer_elect/election可以说leader候选节点，/overseer_elect/election是选举出来的leader
