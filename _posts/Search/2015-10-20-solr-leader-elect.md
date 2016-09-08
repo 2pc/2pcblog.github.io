@@ -13,9 +13,8 @@ SolrCloud 领导选举，最小seq,这点有点同Kafka seq(0)
 集群的leader选举
 
 >
-1.主要相关的类：OverseerElectionContext
-
-2.相关节点：/overseer_elect/election可以说leader候选节点，/overseer_elect/election是选举出来的leader
+1. 主要相关的类：OverseerElectionContext
+2. 相关节点：/overseer_elect/election可以说leader候选节点，/overseer_elect/election是选举出来的leader
 
 ```
 [zk: 172.16.113.253:2182,172.16.113.254:2182/galaxy2/solr(CONNECTED) 56] ls /overseer_elect/election
@@ -37,9 +36,8 @@ numChildren = 2
 
 collection的shard的leader选举
 >
-1.主要相关的类：OverseerElectionContext
-
-2.相关节点：/collections/collection/leaders/shard1(shardN表示这个collection得shard)
+1. 主要相关的类：OverseerElectionContext
+2. 相关节点：/collections/collection/leaders/shard1(shardN表示这个collection得shard)
 可以说某个shard对应的leader候选节点，/collections/collection/leader_elect/shard1/election是选举出来的leader
 
 ```
