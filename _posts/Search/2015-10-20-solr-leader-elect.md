@@ -10,7 +10,7 @@ SolrCloud 领导选举，最小seq,这点有点同Kafka seq(0)
 
 主要有两部分，一个是集群的leader选举过程，一个是collection的shard的leader选举过程
 
-集群的leader选举
+### 集群的leader选举
 
 >
 1. 主要相关的类：OverseerElectionContext
@@ -34,7 +34,7 @@ dataLength = 0
 numChildren = 2
 ```
 
-collection的shard的leader选举
+### collection的shard的leader选举
 >
 1. 主要相关的类：OverseerElectionContext
 2. 相关节点：/collections/collection/leaders/shard1(shardN表示这个collection得shard)
