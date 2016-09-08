@@ -17,9 +17,10 @@ SolrCloud 领导选举，最小seq,这点有点同Kafka seq(0)
 2. 相关节点：/overseer_elect/election可以说leader候选节点，/overseer_elect/election是选举出来的leader
 
 ```
-[zk: 172.16.113.253:2182,172.16.113.254:2182/galaxy2/solr(CONNECTED) 56] ls /overseer_elect/election
+[zk: 172.16.113.253:2182,172.16.113.254:2182
+(CONNECTED) 56] ls /overseer_elect/election
 [166405419031556844-172.17.52.154:8080_solr-n_0000000117, 166405419031556837-172.17.52.155:8080_solr-n_0000000115]
-[zk: 172.16.113.253:2182,172.16.113.254:2182/galaxy2/solr(CONNECTED) 57] get  /overseer_elect/election
+[zk: 172.16.113.253:2182,172.16.113.254:2182(CONNECTED) 57] get  /overseer_elect/election
 null
 cZxid = 0x36002c1fe2
 ctime = Fri May 06 06:02:06 EDT 2016
@@ -316,9 +317,9 @@ void runLeaderProcess(boolean weAreReplacement, int pauseBeforeStartMs) throws K
 可以说某个shard对应的leader候选节点，/collections/collection/leader_elect/shard1/election是选举出来的leader
 
 ```
-[zk: 172.16.113.253:2182,172.16.113.254:2182/galaxy2/solr(CONNECTED) 8] ls   /collections/song/leader_elect/shard1/election
+[zk: 172.16.113.253:2182,172.16.113.254:2182(CONNECTED) 8] ls   /collections/song/leader_elect/shard1/election
 [166405419031556844-core_node1-n_0000000028, 166405419031556837-core_node2-n_0000000026]
-[zk: 172.16.113.253:2182,172.16.113.254:2182/galaxy2/solr(CONNECTED) 9] get  /collections/song/leaders/shard1              
+[zk: 172.16.113.253:2182,172.16.113.254:2182(CONNECTED) 9] get  /collections/song/leaders/shard1              
 {
   "core":"song_shard1_replica1",
   "node_name":"172.17.52.155:8080_solr",
