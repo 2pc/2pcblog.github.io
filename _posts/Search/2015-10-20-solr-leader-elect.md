@@ -33,9 +33,11 @@ ephemeralOwner = 0x0
 dataLength = 0
 numChildren = 2
 ```
+
 集群leader的大致流程调用关系SolrDispatchFilter.init()-->SolrDispatchFilter.createCoreContainer()-->CoreContainer.load()-->ZkContainer.initZooKeeper()-->new ZkController()-->new SolrZkClient()与ZkController.init()中都有选举相关代码
 
 在SolrZkClient()的主要代码
+
 ```
 ///overseer_elect/election下seq最小的节点为leader
 ElectionContext context = new OverseerElectionContext(zkClient,
@@ -51,6 +53,7 @@ overseerElector.setup(context);
 overseerElector.joinElection(context, true);
 ```
 在ZkController.init()的主要代码
+
 ```
 if (!zkRunOnly) {
       overseerElector = new LeaderElector(zkClient);
@@ -62,12 +65,16 @@ if (!zkRunOnly) {
       overseerElector.joinElection(context, false);
     }
 ```
+
 看起来都差不多，主要是两行代码，overseerElector.setup(context)也没干啥事，就是确保/overseer_elect/election节点存在，有就直接返回，没有就创建
+
 ```
 overseerElector.setup(context);
 overseerElector.joinElection(context, false);
 ```
+
 主要看joinElection(ElectionContext context, boolean replacement)，逻辑主要在joinElection(ElectionContext context, boolean replacement,boolean joinAtHead)中实现
+
 ```
  /**
    * Begin participating in the election process. Gets a new sequential number
@@ -171,11 +178,13 @@ public int joinElection(ElectionContext context, boolean replacement,boolean joi
 ```
 
 暂且不关注joinAtHead这段,首先创建的节点是(shardsElectZkPath + "/" + id + "-n_"),注意这里-n_后边是没有序列号的(类似/overseer_elect/election/166405419031556844-172.17.52.154:8080_solr-n_，正常的应该是/overseer_elect/election/166405419031556844-172.17.52.154:8080_solr-n_0000000117)，最多尝试20次，这样会导致后边拿到的int行seq为0，自然是最小的？
+
 ```
  leaderSeqPath = zkClient.create(shardsElectZkPath + "/" + id + "-n_", null,
             CreateMode.EPHEMERAL_SEQUENTIAL, false);
 ```
 getSeq从n_0000000117的串中取出int序列号，这里的nStringSequence是n_xxxxxxx
+
 ```
 public static int getSeq(String nStringSequence) {
     int seq = 0;
@@ -190,6 +199,7 @@ public static int getSeq(String nStringSequence) {
 }
 ```
 在checkIfIamLeader()中判断自己是不是leader,首先与最小的比较，如果小于或等于最小的加入选举，不然找到自己的最靠前的位置(就是插入到seqs保持seqs从小到大排列不变)，并插入，并对前一个节点(这里的index为i - 2，因为i就是找到的比自己大的，i-1就是本身)进行监听
+
 ```
  /**
    * Check if the candidate with the given n_* sequence number is the leader.
@@ -273,6 +283,7 @@ public static int getSeq(String nStringSequence) {
   }
 ```
 判定自己为leader后,在runIamLeaderProcess里调用OverseerElectionContext.runLeaderProcess()需要将节点id(如：{"id":"166405419031556837-172.17.52.155:8080_solr-n_0000000115"})到/overseer_elect/leader，
+
 ```
 void runLeaderProcess(boolean weAreReplacement, int pauseBeforeStartMs) throws KeeperException,
   InterruptedException {
