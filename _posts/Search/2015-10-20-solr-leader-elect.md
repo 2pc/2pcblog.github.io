@@ -33,6 +33,144 @@ ephemeralOwner = 0x0
 dataLength = 0
 numChildren = 2
 ```
+集群leader的大致流程调用关系SolrDispatchFilter.init()-->SolrDispatchFilter.createCoreContainer()-->CoreContainer.load()-->ZkContainer.initZooKeeper()-->new ZkController()-->new SolrZkClient()与ZkController.init()中都有选举相关代码
+
+在SolrZkClient()的主要代码
+```
+///overseer_elect/election下seq最小的节点为leader
+ElectionContext context = new OverseerElectionContext(zkClient,
+    overseer, getNodeName());
+
+ElectionContext prevContext = overseerElector.getContext();
+if (prevContext != null) {
+  prevContext.cancelElection();
+}
+
+overseerElector.setup(context);
+//选出seq最小的节点作为leader
+overseerElector.joinElection(context, true);
+```
+在ZkController.init()的主要代码
+```
+if (!zkRunOnly) {
+      overseerElector = new LeaderElector(zkClient);
+      this.overseer = new Overseer(shardHandler, updateShardHandler,
+          adminPath, zkStateReader, this, cc.getConfig());
+      ElectionContext context = new OverseerElectionContext(zkClient,
+          overseer, getNodeName());
+      overseerElector.setup(context);
+      overseerElector.joinElection(context, false);
+    }
+```
+看起来都差不多，主要是两行代码，overseerElector.setup(context)也没干啥事，就是确保/overseer_elect/election节点存在，有就直接返回，没有就创建
+```
+overseerElector.setup(context);
+overseerElector.joinElection(context, false);
+```
+主要看joinElection(ElectionContext context, boolean replacement)，逻辑主要在joinElection(ElectionContext context, boolean replacement,boolean joinAtHead)中实现
+```
+ /**
+   * Begin participating in the election process. Gets a new sequential number
+   * and begins watching the node with the sequence number before it, unless it
+   * is the lowest number, in which case, initiates the leader process. If the
+   * node that is watched goes down, check if we are the new lowest node, else
+   * watch the next lowest numbered node.
+   *
+   * @return sequential node number
+   */
+public int joinElection(ElectionContext context, boolean replacement,boolean joinAtHead) throws KeeperException, InterruptedException, IOException {
+  context.joinedElectionFired();
+  
+  final String shardsElectZkPath = context.electionPath + LeaderElector.ELECTION_NODE;
+  
+  long sessionId = zkClient.getSolrZooKeeper().getSessionId();
+  String id = sessionId + "-" + context.id;
+  String leaderSeqPath = null;
+  boolean cont = true;
+  int tries = 0;
+  while (cont) {
+    try {
+      if(joinAtHead){
+        log.info("node {} Trying to join election at the head ", id);
+        /**
+         * "/overseer_elect/election"中序号最小的节点为leader
+         * 类似n_0000000001 or n_0000000003中较小的节点
+         */
+        List<String> nodes = OverseerCollectionProcessor.getSortedElectionNodes(zkClient);
+        if(nodes.size() <2){
+          leaderSeqPath = zkClient.create(shardsElectZkPath + "/" + id + "-n_", null,
+              CreateMode.EPHEMERAL_SEQUENTIAL, false);
+        } else {
+          String firstInLine = nodes.get(1);
+          log.info("The current head: {}", firstInLine);
+          Matcher m = LEADER_SEQ.matcher(firstInLine);
+          if (!m.matches()) {
+            throw new IllegalStateException("Could not find regex match in:"
+                + firstInLine);
+          }
+          leaderSeqPath = shardsElectZkPath + "/" + id + "-n_"+ m.group(1);
+          zkClient.create(leaderSeqPath, null, CreateMode.EPHEMERAL, false);
+          log.info("Joined at the head  {}", leaderSeqPath );
+
+        }
+      } else {
+        leaderSeqPath = zkClient.create(shardsElectZkPath + "/" + id + "-n_", null,
+            CreateMode.EPHEMERAL_SEQUENTIAL, false);
+      }
+
+      context.leaderSeqPath = leaderSeqPath;
+      cont = false;
+    } catch (ConnectionLossException e) {
+      // we don't know if we made our node or not...
+      List<String> entries = zkClient.getChildren(shardsElectZkPath, null, true);
+      
+      boolean foundId = false;
+      for (String entry : entries) {
+        String nodeId = getNodeId(entry);
+        if (id.equals(nodeId)) {
+          // we did create our node...
+          foundId  = true;
+          break;
+        }
+      }
+      if (!foundId) {
+        cont = true;
+        if (tries++ > 20) {
+          throw new ZooKeeperException(SolrException.ErrorCode.SERVER_ERROR,
+              "", e);
+        }
+        try {
+          Thread.sleep(50);
+        } catch (InterruptedException e2) {
+          Thread.currentThread().interrupt();
+        }
+      }
+
+    } catch (KeeperException.NoNodeException e) {
+      // we must have failed in creating the election node - someone else must
+      // be working on it, lets try again
+      if (tries++ > 20) {
+        context = null;
+        throw new ZooKeeperException(SolrException.ErrorCode.SERVER_ERROR,
+            "", e);
+      }
+      cont = true;
+      try {
+        Thread.sleep(50);
+      } catch (InterruptedException e2) {
+        Thread.currentThread().interrupt();
+      }
+    }
+  }
+  int seq = getSeq(leaderSeqPath);
+  //
+  checkIfIamLeader(seq, context, replacement);
+  
+  return seq;
+}
+```
+
+
 
 ### collection的shard的leader选举
 >
