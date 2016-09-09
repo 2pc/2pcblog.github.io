@@ -313,8 +313,8 @@ void runLeaderProcess(boolean weAreReplacement, int pauseBeforeStartMs) throws K
 ### collection的shard的leader选举
 >
 1. 主要相关的类：ShardLeaderElectionContext
-2. 相关节点：/collections/collection/leaders/shard1(shardN表示这个collection得shard)
-可以说某个shard对应的leader候选节点，/collections/collection/leader_elect/shard1/election是选举出来的leader
+2. 相关节点：/collections/collection/leader_elect/shard1/election(shardN表示这个collection得shard)
+可以说某个shard对应的leader候选节点，/collections/collection/leaders/shard1是选举出来的leader
 
 ```
 [zk: 172.16.113.253:2182,172.16.113.254:2182(CONNECTED) 8] ls   /collections/song/leader_elect/shard1/election
@@ -339,13 +339,52 @@ numChildren = 0
 
 Shard的leader选举的大致流程调用关系SolrDispatchFilter.init()-->SolrDispatchFilter.createCoreContainer()-->CoreContainer.load()-->CoreContainer.create()-->CoreContainer.registerCore-->ZkContainer.registerInZk()-->ZkController.register-->ZkController.joinElection 
 
-ZkController.joinElection中选举逻辑也是那两行代码，不过context现在是ShardLeaderElectionContext
+ZkController.joinElection中
+```
+```
+  private void joinElection(CoreDescriptor cd, boolean afterExpiration) throws InterruptedException, KeeperException, IOException {
+    // look for old context - if we find it, cancel it
+    String collection = cd.getCloudDescriptor().getCollectionName();
+    final String coreNodeName = cd.getCloudDescriptor().getCoreNodeName();
+    
+    ContextKey contextKey = new ContextKey(collection, coreNodeName);
+    
+    ElectionContext prevContext = electionContexts.get(contextKey);
+    
+    if (prevContext != null) {
+      prevContext.cancelElection();
+    }
+    
+    String shardId = cd.getCloudDescriptor().getShardId();
+    
+    Map<String,Object> props = new HashMap<>();
+    // we only put a subset of props into the leader node
+    props.put(ZkStateReader.BASE_URL_PROP, getBaseUrl());
+    props.put(ZkStateReader.CORE_NAME_PROP, cd.getName());
+    props.put(ZkStateReader.NODE_NAME_PROP, getNodeName());
+    
+ 
+    ZkNodeProps ourProps = new ZkNodeProps(props);
+
+    
+    ElectionContext context = new ShardLeaderElectionContext(leaderElector, shardId,
+        collection, coreNodeName, ourProps, this, cc);
+
+    leaderElector.setup(context);
+    electionContexts.put(contextKey, context);
+    leaderElector.joinElection(context, false);
+  }
+```
+
+```
+
+选举逻辑也是那两行代码，不过context现在是ShardLeaderElectionContext
 
 ```
 overseerElector.setup(context);
 overseerElector.joinElection(context, false);
 ```
-其他逻辑与集群大致一样，最后runIamLeaderProcess中调用ShardLeaderElectionContext的runLeaderProcess，这段才是最大的差别
+其他逻辑与集群大致一样，选择/collections/collection/leader_elect/shard1/election下seq最小的最为leader，将leader信息set到/collections/collection/leaders/shard1节点；最后runIamLeaderProcess中调用ShardLeaderElectionContext的runLeaderProcess，这段才是最大的差别
 
 ```
 context.runLeaderProcess(weAreReplacement,0);
@@ -495,40 +534,7 @@ context.runLeaderProcess(weAreReplacement,0);
 
 
 
-```
-  private void joinElection(CoreDescriptor cd, boolean afterExpiration) throws InterruptedException, KeeperException, IOException {
-    // look for old context - if we find it, cancel it
-    String collection = cd.getCloudDescriptor().getCollectionName();
-    final String coreNodeName = cd.getCloudDescriptor().getCoreNodeName();
-    
-    ContextKey contextKey = new ContextKey(collection, coreNodeName);
-    
-    ElectionContext prevContext = electionContexts.get(contextKey);
-    
-    if (prevContext != null) {
-      prevContext.cancelElection();
-    }
-    
-    String shardId = cd.getCloudDescriptor().getShardId();
-    
-    Map<String,Object> props = new HashMap<>();
-    // we only put a subset of props into the leader node
-    props.put(ZkStateReader.BASE_URL_PROP, getBaseUrl());
-    props.put(ZkStateReader.CORE_NAME_PROP, cd.getName());
-    props.put(ZkStateReader.NODE_NAME_PROP, getNodeName());
-    
- 
-    ZkNodeProps ourProps = new ZkNodeProps(props);
 
-    
-    ElectionContext context = new ShardLeaderElectionContext(leaderElector, shardId,
-        collection, coreNodeName, ourProps, this, cc);
-
-    leaderElector.setup(context);
-    electionContexts.put(contextKey, context);
-    leaderElector.joinElection(context, false);
-  }
-```
 
 SolrCloud Group
 
