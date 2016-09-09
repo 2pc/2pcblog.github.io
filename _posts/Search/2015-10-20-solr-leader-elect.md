@@ -531,6 +531,30 @@ context.runLeaderProcess(weAreReplacement,0);
     }    
   }
 ```
+如果选举leader成功还要做相关的Recovery工作，会启动一个LeaderInitiatedRecoveryThread线程
+
+```
+startLeaderInitiatedRecoveryOnReplicas(coreName);
+```
+在LeaderInitiatedRecoveryThread线程中通过HttpSolrServer发送Recovery请求,中间省略部分代码
+
+```
+RequestRecovery recoverRequestCmd = new RequestRecovery();
+recoverRequestCmd.setAction(CoreAdminAction.REQUESTRECOVERY);
+recoverRequestCmd.setCoreName(coreNeedingRecovery);
+HttpSolrServer server = new HttpSolrServer(recoveryUrl);
+server.setSoTimeout(60000);
+server.setConnectionTimeout(15000);
+server.request(recoverRequestCmd);
+```
+
+在CoreAdminHandler的handleRequestInternal可以找到对应Action的处理逻辑
+```
+case REQUESTRECOVERY: {
+  this.handleRequestRecoveryAction(req, rsp);
+  break;
+}
+```
 
 
 
