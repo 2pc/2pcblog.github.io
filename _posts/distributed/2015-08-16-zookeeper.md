@@ -42,6 +42,7 @@ protected boolean totalOrderPredicate(long newId, long newZxid, long newEpoch, l
             ((newZxid > curZxid) || ((newZxid == curZxid) && (newId > curId)))));
 }
 ```
+
 ####  LOOKING 状态时开启一轮新的选举
 
 首先是选举的轮数(electionEpoch/logicalclock)加1，并将选票更新为自己广播出去。
@@ -87,6 +88,7 @@ if (n.electionEpoch > logicalclock) {
     }
     sendNotifications();
 ```
+
 ##### 如果当前自己的选举轮数靠前了，那还用比嘛？
 
 ```
