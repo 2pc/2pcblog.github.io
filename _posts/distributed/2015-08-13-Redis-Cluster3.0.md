@@ -139,3 +139,68 @@ for (int i = 0; i < 1000000; i++) {
 System.out.println(jc.del("*".getBytes()));
 System.out.println("====");
 ```
+
+###  Codis 环境
+#### 源码安装(预先准备好go环境[go学习笔记](http://2pc.github.io/2015/06/12/golang))
+
+```
+go get -u -d github.com/CodisLabs/codis
+```
+#### 默认配置config.ini，修改下zookeeper地址端口，dashboard_addr
+
+```
+zk=127.0.0.1:2181
+dashboard_addr=172.17.32.127:18087
+```
+#### 启动 dashboard 
+
+```
+bin/codis-config dashboard &
+```
+
+#### 初始化 slots
+
+```
+bin/codis-config slot init 
+```
+#### 启动 Codis Redis
+
+```
+/data/dev/GoProj/src/github.com/CodisLabs/codis/bin
+cp ../test/redis.temp redis.6379.conf 
+cp ../test/redis.temp redis.6380.conf 
+cp ../test/redis.temp redis.6479.conf 
+cp ../test/redis.temp redis.6480.conf 
+./codis-server  redis.6379.conf  &
+./codis-server  redis.6380.conf & 
+./codis-server  redis.6479.conf & 
+./codis-server  redis.6480.conf & 
+```
+####  添加一个group，group的id为1， 并添加一个redis master、slave到该group
+
+```
+bin/codis-config server add 1 localhost:6379 master
+bin/codis-config server add 1 localhost:6380 slave
+bin/codis-config server add 2 localhost:6479 master
+bin/codis-config server add 2 localhost:6480 slave
+```
+#### 设置 server group 服务的 slot 范围
+
+```
+bin/codis-config slot range-set 0 511 1 online
+bin/codis-config slot range-set 512 1023 2 online
+```
+
+#### 启动 codis-proxy
+
+```
+bin/codis-proxy -c config.ini -L ./log/proxy.log  --cpu=8 --addr=0.0.0.0:19000 --http-addr=0.0.0.0:11000 & 
+```
+#### 刚启动的 codis-proxy 默认是处于 offline状态的, 然后设置 proxy 为 online 状态, 只有处于 online 状态的 proxy 才会对外提供服务
+
+```
+bin/codis-config -c config.ini proxy online proxy_1
+
+```
+#### dashboard
+地址： http://172.17.32.127:18087/admin/
