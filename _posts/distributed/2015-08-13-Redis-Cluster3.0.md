@@ -209,6 +209,7 @@ bin/codis-proxy -c config.ini -L ./log/proxy.log  --cpu=8 --addr=0.0.0.0:19000 -
 bin/codis-config -c config.ini proxy online proxy_1
 
 ```
+
 #### dashboard
 
 地址： http://172.17.32.127:18087/admin/
