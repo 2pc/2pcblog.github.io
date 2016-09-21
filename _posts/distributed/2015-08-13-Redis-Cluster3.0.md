@@ -142,6 +142,8 @@ System.out.println("====");
 
 ###  Codis 环境
 
+#### Codis 2.x
+
 #### 源码安装(预先准备好go环境[go学习笔记](http://2pc.github.io/2015/06/12/golang))
 
 ```
@@ -213,3 +215,148 @@ bin/codis-config -c config.ini proxy online proxy_1
 #### dashboard
 
 地址： http://172.17.32.127:18087/admin/
+
+#### Codis 3.x
+
+##### 下载源码编译
+
+```
+/data/dev/GoProj/src/github.com/CodisLabs/
+mv codis codis2.x
+https://github.com/CodisLabs/codis/archive/3.0.3.zip
+unzip 3.0.3.zip
+mv codis-3.0.3/ codis
+cd codis
+make
+```
+
+##### 编译完生成的bin目录
+
+```
+total 60484
+drwxr-xr-x. 4 root root     4096 Sep 21 11:21 assets
+-rwxr-xr-x. 1 root root 14518868 Sep 21 11:21 codis-admin
+-rwxr-xr-x. 1 root root 15765944 Sep 21 11:21 codis-dashboard
+-rwxr-xr-x. 1 root root  8900440 Sep 21 11:21 codis-fe
+-rwxr-xr-x. 1 root root  8668003 Sep 21 11:21 codis-ha
+-rwxr-xr-x. 1 root root 10158023 Sep 21 11:21 codis-proxy
+-rwxr-xr-x. 1 root root  3743354 Sep 21 11:21 codis-server
+-rw-r--r--. 1 root root    32216 Sep 21 11:16 redis.6379.conf
+-rw-r--r--. 1 root root    32216 Sep 21 11:16 redis.6380.conf
+-rw-r--r--. 1 root root    32216 Sep 21 11:16 redis.6479.conf
+-rw-r--r--. 1 root root    32216 Sep 21 11:16 redis.6480.conf
+-rw-r--r--. 1 root root    32216 Sep 21 11:16 redis.temp
+-rw-r--r--. 1 root root       96 Sep 21 11:21 version
+```
+
+##### 创建conf,logs目录，用来存放配置文件，日志
+
+```
+mkdir conf
+mkdir logs
+```
+
+##### dashboard
+
+生成默认配置项
+
+```
+bin/codis-dashboard --default-config | tee conf/dashboard.toml
+```
+
+启动或停止dashboard
+
+```
+nohup bin/codis-dashboard --ncpu=4 --config=conf/dashboard.toml --log=logs/dashboard.log --log-level=WARN &
+bin/codis-admin --dashboard=localhost:18080 --shutdown
+```
+
+##### codis-proxy
+
+生成默认配置项
+
+```
+bin/codis-proxy --default-config | tee conf/cproxy.toml
+```
+启动proxy
+
+```
+nohup bin/codis-proxy --ncpu=4 --config=conf/proxy.toml --log=logs/proxy.log --log-level=WARN &
+```
+
+设置proxy为online状态
+
+```
+bin/codis-admin --dashboard=172.17.32.127:18080 --create-proxy -x 172.17.32.127:11080
+```
+
+停止proxy
+
+```
+bin/codis-admin --proxy=172.17.32.127:11080 --shutdown
+```
+##### codis fe
+
+生成配置文件
+
+```
+bin/codis-admin --dashboard-list --zookeeper=127.0.0.1:2181 | tee conf/codis.json
+```
+
+启动codis-fe
+
+```
+bin/codis-fe --ncpu=4 --log=logs/fe.log --log-level=WARN --dashboard-list=conf/codis.json --listen=0.0.0.0:8080 &
+```
+
+##### codis-ha
+
+```
+bin/codis-ha --log=logs/codis/ha.log --log-level=WARN --dashboard=172.17.32.127:18080 &
+```
+
+
+##### codis-admin
+
+添加 Redis Server Group
+
+创建group 
+
+```
+bin/codis-admin --dashboard=172.17.32.127:18080 --create-group   --gid=1
+bin/codis-admin --dashboard=172.17.32.127:18080 --create-group   --gid=2
+```
+添加服务器server到group(xx80为从库)
+
+```
+bin/codis-admin --dashboard=172.17.32.127:18080  --group-add --gid=1 --addr=172.17.32.127:6379
+bin/codis-admin --dashboard=172.17.32.127:18080  --group-add --gid=1 --addr=172.17.32.127:6380
+bin/codis-admin --dashboard=172.17.32.127:18080  --group-add --gid=2 --addr=172.17.32.127:6479
+bin/codis-admin --dashboard=172.17.32.127:18080  --group-add --gid=2 --addr=172.17.32.127:6480
+```
+
+slave(xx80)同步master(xx69)
+
+```
+bin/codis-admin --dashboard=172.17.32.127:18080 --sync-action --create --addr=172.17.32.127:6380
+bin/codis-admin --dashboard=172.17.32.127:18080 --sync-action --create --addr=172.17.32.127:6480
+```
+
+升级slave为master
+
+```
+bin/codis-admin --dashboard=172.17.32.127:18080 -promote-server --gid=1 --addr=172.17.32.127:6380
+```
+
+初始化slots,设置group的范围
+
+```
+bin/codis-admin --dashboard=172.17.32.127:18080 --slot-action --create-range --beg=0 --end=511 --gid=1
+bin/codis-admin --dashboard=172.17.32.127:18080 --slot-action --create-range --beg=512 --end=1023 --gid=2
+```
+ref:
+
+1. [codis 3.0.3安装搭建](http://blog.csdn.net/zengxuewen2045/article/details/51559880)
+
+2. [Codis 使用文档](https://github.com/CodisLabs/codis/blob/master/doc/tutorial_zh.md)
+
