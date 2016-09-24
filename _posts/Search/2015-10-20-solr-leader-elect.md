@@ -340,7 +340,7 @@ numChildren = 0
 Shard的leader选举的大致流程调用关系SolrDispatchFilter.init()-->SolrDispatchFilter.createCoreContainer()-->CoreContainer.load()-->CoreContainer.create()-->CoreContainer.registerCore-->ZkContainer.registerInZk()-->ZkController.register-->ZkController.joinElection 
 
 ZkController.joinElection中
-```
+
 ```
   private void joinElection(CoreDescriptor cd, boolean afterExpiration) throws InterruptedException, KeeperException, IOException {
     // look for old context - if we find it, cancel it
@@ -376,7 +376,6 @@ ZkController.joinElection中
   }
 ```
 
-```
 
 选举逻辑也是那两行代码，不过context现在是ShardLeaderElectionContext
 
