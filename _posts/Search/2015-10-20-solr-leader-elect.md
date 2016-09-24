@@ -548,6 +548,7 @@ server.request(recoverRequestCmd);
 ```
 
 在CoreAdminHandler的handleRequestInternal可以找到对应Action的处理逻辑
+
 ```
 case REQUESTRECOVERY: {
   this.handleRequestRecoveryAction(req, rsp);
