@@ -597,3 +597,5 @@ Caused by: java.lang.OutOfMemoryError: Java heap space
         at org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:223)
         at org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1127)
 ```
+
+[solr3.5 分布式groupby源码分析](http://blog.sina.com.cn/s/blog_4d58e3c00102v2o1.html)
