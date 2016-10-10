@@ -73,7 +73,7 @@ schema定义与配置
 
 <fieldType name="comma_str" class="solr.TextField" positionIncrementGap="100">
     <analyzer>
-        <tokenizer class="com.meizu.galaxy2.lucene.analyzer.CommaTokenizerFactory"/>
+        <tokenizer class="com.xxx.yyy.zzz.CommaTokenizerFactory"/>
     </analyzer>
 </fieldType>
 
