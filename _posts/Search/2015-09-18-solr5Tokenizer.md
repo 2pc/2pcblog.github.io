@@ -86,3 +86,6 @@ schema定义与配置
 ```
 
 没错，这玩意也可以用PatternTokenizerFactory搞定
+
+>
+[ElasticSearch+Solr几个案例笔记](http://blog.csdn.net/u010454030/article/details/52625868)
