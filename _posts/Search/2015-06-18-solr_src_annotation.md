@@ -1,6 +1,6 @@
 
 
-solr 查询语法
+Solr Query Syntax and Parsing 查询语法
 >
 1. (Common Query Parameters)[https://cwiki.apache.org/confluence/display/solr/Common+Query+Parameters]
 2. (The Standard Query Parser)[https://cwiki.apache.org/confluence/display/solr/The+Standard+Query+Parser]
