@@ -1,4 +1,10 @@
-
+---
+layout: post
+title: "Solr Code Annotation"
+keywords: ["distributed","Search","SolrCloud"]
+description: "SolrCloud Leader Elect"
+category: "distributed"
+tags: ["distributed","Search","SolrCloud"]
 
 Solr Query Syntax and Parsing 查询语法
 >
