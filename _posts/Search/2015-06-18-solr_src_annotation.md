@@ -38,3 +38,12 @@ mm参数
 2. [Min Number Should Match Specification Format](http://lucene.apache.org/solr/6_2_1/solr-core/org/apache/solr/util/doc-files/min-should-match.html)
 3. [Mininum Shoud Match-ES](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-minimum-should-match.html)
 4. [elasticsearch中minimum_should_match的一些理解](http://blog.csdn.net/xiao_jun_0820/article/details/51095521)
+
+solr mm 参数例子
+
+1，mm=a,a > 0 （clauses个数*百分数向下取整 < a）
+
+首先依据分词得到clauses数，比如现在歌手字段（singer:简弘亦。对应ik分词结果为简，弘，亦三个） 然后搜索singer:小幸运简弘亦，此时依据ik分词为（小，幸运，简，弘，亦）类似于5个clauses，如果mm=1，mm=2或者mm=3都可以出搜索结果，是如果正数百分数，搜索词（小幸运简弘起）是5个clauses那么要想匹配上简弘亦，最终clauses个数*百分数 的结果向下去整，必须小于3,这样当搜索词（小幸运简弘起）为是5个clauses，百分数最大为59%，即mm=2小于59%，需要match的clauses语句为数5*59%小于=2  如果搜索词是“小幸运简弘”或者 “幸运简弘起” 由于ik后是四个词，也就是4个clauses，那么最大74%，即4*74%小于3=2
+
+
+
