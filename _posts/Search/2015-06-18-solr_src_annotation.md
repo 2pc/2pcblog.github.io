@@ -31,6 +31,7 @@ QueryComponent.prepare中进行参数解析，得到QParser，Query,FilterQuery�
 >
 1. [Solr dismax 源码详解以及使用方法](http://www.wxdl.cn/index/solr-dismax.html)
 2. [Solr 的edismax与dismax比较与分析](http://www.linuxidc.com/Linux/2012-10/72373.htm)
+3. [Solr 查询中fq参数的解析原理](http://blog.sina.com.cn/s/blog_56fd58ab0100v3up.html)
 
 mm参数
 >
