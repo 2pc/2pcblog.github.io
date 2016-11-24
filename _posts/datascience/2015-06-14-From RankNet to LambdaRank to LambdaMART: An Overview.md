@@ -12,7 +12,7 @@ tags: ["LambdaMART","Learning To Rank"]
 但是概率的范围应该是[0,1]之间，参考逻辑斯蒂回归的归一化函数归一化得
 
 $$ 
-P_ij=\frac e^{F(x_i)-F(x_j)} {1+e^{F(x_i)-F(x_j)} 
+P_ij=\frac {e^{(F(x_i)-F(x_j))}}  {1+e^(F(x_i)-F(x_j))}  
 $$
 
 
