@@ -18,15 +18,19 @@ P_{ij}=\frac {e^{(F(x_i)-F(x_j))}}  {1+e^(F(x_i)-F(x_j))}
 $$
 
 令，   
+
 $$   
 o_{ij} =F(x_i)-F(x_j)
 $$
 
 得，   
+
 $$   
 P_{ij}=\frac {e^{o_{ij}}}  {1+e^{o_{ij}}}
-$$
+$$   
+
 即，   
+
 $$   
 P_{ij}=\frac 1 {1+e^{-o_{ij}}} 
 $$
