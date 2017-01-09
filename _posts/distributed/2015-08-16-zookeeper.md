@@ -122,3 +122,6 @@ else if (n.electionEpoch < logicalclock) {
 >
 1. 尽管zookeeper保证了大多数，但是如果client读取到这些大多数以外的节点,必然会读取到老数据，zookeeper可以通过执行sync来解决   
 2. watch机制可否？A,B均注册watcher到节点，当A更新节点数据时，server通知B，B执行watcher
+
+
+[ZooKeeper-Consistency-Guarantees](https://phoenixjiangnan.github.io/2016/07/04/distributed%20system/zookeeper/ZooKeeper-Consistency-Guarantees/)
