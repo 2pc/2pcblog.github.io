@@ -210,6 +210,7 @@ boolean查询must,should,must_not
 3. must_not: 文档必须不匹配条件
 
 ###　elasticsearch5.0.1配置
+
 ```
 ERROR: bootstrap checks failed
 max file descriptors [65535] for elasticsearch process is too low, increase to at least [65536]
@@ -217,16 +218,19 @@ max number of threads [1024] for user [elasticsearch] is too low, increase to at
 max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
 ```
 修改vim /etc/security/limits.d/90-nproc.conf 
+
 ```
 *          soft    nproc     2048
 root       soft    nproc     unlimited
 ```
 修改vim /etc/security/limits.d/90-nproc.conf 
+
 ```
 * soft nofile 65536
 * hard nofile 65536
 ```
 修改 /etc/sysctl.conf
+
 ```
 sysctl -w vm.max_map_count=262144
 ```
