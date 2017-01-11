@@ -213,7 +213,7 @@ boolean查询must,should,must_not
 2. should: should下面会带一个以上的条件，至少满足一个条件，这个文档就符合should   
 3. must_not: 文档必须不匹配条件
 
-####　elasticsearch5.0.1配置
+####　elasticsearch5.1.1配置
 
 ```
 ERROR: bootstrap checks failed
@@ -242,6 +242,50 @@ root       soft    nproc     unlimited
 sysctl -w vm.max_map_count=262144
 ```
 
+ansj
+
+```
+curl -XPUT 127.0.0.1:9200/test -d '{
+    "settings" : {
+        "number_of_shards" : 1,
+        "number_of_replicas" : 0
+
+    },
+    "mappings" : {
+        "test" : {
+            "_all" : { "enabled" : false },
+            "properties" : {
+                "name" : { "type" : "string", "analyzer" : "index_ansj", "search_analyzer" : "query_ansj" }
+            }
+        }
+    }
+}'
+```
+
+index
+
+```
+curl -XPUT 'http://127.0.0.1:9200/test/test/1' -d '{
+    "name" : "中国人民万岁",
+    "post_date" : "2009-11-15T14:12:12",
+    "message" : "trying out Elasticsearch"
+}'
+```
+
+
+query
+
+```
+http://127.0.0.1:9200/test/test/_search?q=name:%E4%B8%AD%E5%9B%BD
+```
+
+analyze测试
+
+```
+http://172.17.32.128:9200/_cat/test/analyze?text=%E4%B8%AD%E5%9B%BD%E6%9C%80%E5%A4%A7%E5%AF%B9%E4%BF%84%E9%99%86%E8%B7%AF%E5%8F%A3%E5%B2%B8%E8%BF%8E%E4%B8%AD%E5%9B%BD%E5%9C%A8%E4%BF%84%E5%8A%A1%E5%B7%A5%E4%BA%BA%E5%91%98%E8%BF%94%E4%B9%A1%E6%BD%AE&analyzer=query_ansj
+
+curl http://172.17.32.128:9200/_analyze?text=中国最大对俄陆路口岸迎中国在俄务工人员返乡潮&analyzer=query_ansj&pretty=true
+```
 [2.3版本的参考文档](https://www.elastic.co/guide/en/elasticsearch/reference/2.3/index.html)，
 
 可以看看Breaking changes
