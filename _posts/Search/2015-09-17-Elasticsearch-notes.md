@@ -58,13 +58,13 @@ wget https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v1.9.3
 unzip  elasticsearch-analysis-ik-1.9.3.zip  -d  ./plugins/ik
 ```
 
-create an index,pretty 返回数据格式不一样
+#### create an index,pretty 返回数据格式不一样
 ```
 curl -XPUT 'localhost:9200/indexname'
 curl -XPUT 'localhost:9200/indexname?pretty'
 ```
 
-Index and Query a Document
+#### Index and Query a Document
 
 index a simple indexname document，indextype
 
@@ -86,7 +86,7 @@ bash-3.2$ curl -XPUT 'localhost:9200/indexname/indextype/1?pretty' -d '
   "created" : false
 }
 ```
-retrieve that document
+#### retrieve that document
 
 ```
 curl -XGET 'localhost:9200/indexname/indextype/1?pretty'
@@ -101,7 +101,7 @@ curl -XGET 'localhost:9200/indexname/indextype/1?pretty'
   }
 }
 ```
-list All indices
+#### list All indices
 
 ```
 bash-3.2$ curl 'localhost:9200/_cat/indices?v'
@@ -113,7 +113,7 @@ yellow open   db_news     5   1          1            0      4.2kb          4.2k
 yellow open   indexname   5   1          1            0      7.1kb          7.1kb
 yellow open   customer    5   1          1            0      3.5kb          3.5kb
 ```
-Delete an Index
+#### Delete an Index
 
 ```
 bash-3.2$ curl -XDELETE 'localhost:9200/customer?pretty'
@@ -209,7 +209,7 @@ boolean查询must,should,must_not
 2. should: should下面会带一个以上的条件，至少满足一个条件，这个文档就符合should   
 3. must_not: 文档必须不匹配条件
 
-####　elasticsearch5.0.1
+###　elasticsearch5.0.1配置
 ```
 ERROR: bootstrap checks failed
 max file descriptors [65535] for elasticsearch process is too low, increase to at least [65536]
