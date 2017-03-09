@@ -33,9 +33,8 @@ QueryComponent.prepare中进行参数解析，得到QParser，Query,FilterQuery�
 2. [Solr 的edismax与dismax比较与分析](http://www.linuxidc.com/Linux/2012-10/72373.htm)
 3. [Solr 查询中fq参数的解析原理](http://blog.sina.com.cn/s/blog_56fd58ab0100v3up.html)
 
-mm参数
+mm参数   
 
->
 1. [Solr’s mm parameter – Explanation of Min Number Should Match](http://blog.thedigitalgroup.com/vijaym/solrs-mm-parameter-explanation-of-min-number-should-match/)   
 2. [Min Number Should Match Specification Format](http://lucene.apache.org/solr/6_2_1/solr-core/org/apache/solr/util/doc-files/min-should-match.html)   
 3. [Mininum Shoud Match-ES](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-minimum-should-match.html)   
