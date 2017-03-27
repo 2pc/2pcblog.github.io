@@ -152,5 +152,5 @@ gdb  ./gbdt-train
 * [RankLib源码分析](http://blog.csdn.net/guoguo881218/article/category/2805459)
 * [理解GBDT算法（一）——理论](http://blog.csdn.net/puqutogether/article/details/41957089)
 * [理解GBDT算法（二）——基于残差的版本](http://blog.csdn.net/puqutogether/article/details/44752611)
-* [理解GBDT算法（三）——基于梯度的版本](http://blog.csdn.net/puqutogether/article/details/44781035)
-
+* [理解GBDT算法（三）——基于梯度的版本](http://blog.csdn.net/puqutogether/article/details/44781035)   
+* [求解分裂问题参考李航博士统计学习方法-Machine Learning & Algorithm 决策树与迭代决策树（GBDT）](http://www.cnblogs.com/maybe2030/p/4734645.html#_label4)   
