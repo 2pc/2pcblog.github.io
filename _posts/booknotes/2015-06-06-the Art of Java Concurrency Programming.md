@@ -117,17 +117,18 @@ vmstat 命令显示CS(Content Switch),表示上下文切换次数
 #### 9.2.1
 ##### 9.2.1.1
 ##### 9.2.1.2 任务队列
-ArrayBlockingQueue 一个基于数组结构的有界阻塞对列（FIFO）
-LinkedBlockingQueue 一个基于链表结构的阻塞队列，吞吐量通常高于ArrayBlockingQueue
-SynchronousQueue  一个不存储元素的阻塞队列，吞吐量通常高于LinkedBlockingQueue
+>
+1. ArrayBlockingQueue 一个基于数组结构的有界阻塞对列（FIFO）
+2. LinkedBlockingQueue 一个基于链表结构的阻塞队列，吞吐量通常高于ArrayBlockingQueue
+3. SynchronousQueue  一个不存储元素的阻塞队列，吞吐量通常高于LinkedBlockingQueue
 ##### 9.2.1.3
 ##### 9.2.1.4
 ##### 9.2.1.5 饱和策略（RejectedExecutionHandler）
-AbortPolicy 直接抛出异常
-CallerRunsPolicy 只用调用者所在线程来运行任务
-DiscardOldestPolicy 丢弃队列里最近的一个任务，并执行当前任务
-DiscardPolicy 不处理，丢弃掉
-自定义
+1. AbortPolicy 直接抛出异常
+2. CallerRunsPolicy 只用调用者所在线程来运行任务
+3. DiscardOldestPolicy 丢弃队列里最近的一个任务，并执行当前任务
+4. DiscardPolicy 不处理，丢弃掉
+5. 自定义
 
 
 ## 第十章 Executor框架
