@@ -125,3 +125,54 @@ else if (n.electionEpoch < logicalclock) {
 
 
 [ZooKeeper-Consistency-Guarantees](https://phoenixjiangnan.github.io/2016/07/04/distributed%20system/zookeeper/ZooKeeper-Consistency-Guarantees/)
+
+#### Zookeeper之分布式系统中生成全局唯一ID-SessionId
+
+>
+1. 64位，其中高8位表示机器序列号，即所在的机器，后56为用当前时间的毫秒数随机
+2. 3.4.6之前使用右移操作，3.4.6使用无符号右移。避免负数导致无法区分机器序列号
+3. 3.5.0开始不实用毫秒数，而是使用了System.nanoTime避免人为改动系统时间可能导致的问题
+
+##### 3.4.5(3.4.6之前?)
+
+```
+public static long initializeNextSession(long id) {
+    long nextSid = 0;
+    nextSid = (System.currentTimeMillis() << 24) >> 8;
+    nextSid =  nextSid | (id <<56);
+    return nextSid;
+}
+```
+
+##### 3.4.6
+
+```
+public static long initializeNextSession(long id) {
+    long nextSid = 0;
+    nextSid = (System.currentTimeMillis() << 24) >>> 8;
+    nextSid =  nextSid | (id <<56);
+    return nextSid;
+}
+```
+
+##### 3.5.0
+
+```
+public static long initializeNextSession(long id) {
+    long nextSid;
+    nextSid = (Time.currentElapsedTime() << 24) >>> 8;
+    nextSid =  nextSid | (id <<56);
+    return nextSid;
+}
+/**
+* Returns time in milliseconds as does System.currentTimeMillis(),
+* but uses elapsed time from an arbitrary epoch more like System.nanoTime().
+* The difference is that if somebody changes the system clock,
+* Time.currentElapsedTime will change but nanoTime won't. On the other hand,
+* all of ZK assumes that time is measured in milliseconds.
+* @return  The time in milliseconds from some arbitrary point in time.
+*/
+public static long currentElapsedTime() {
+    return System.nanoTime() / 1000000;
+}
+```
