@@ -1,0 +1,36 @@
+---
+layout: page
+title: 2pc's
+tagline: 
+---
+{% include JB/setup %}
+
+<h3>  Across the Great Wall we can reach every corner in the world </h3> 
+
+<h2> Latest Posts </h2>
+
+<ul class="posts">
+<!-- 遍历分页后的文章 -->
+{% for post in paginator.posts %}
+    <li>  <span>{{ post.date | date_to_string }}</span> &raquo; {{ post.draft_flag }}  <a href="{{ BASE_PATH }}{{ post.url }}">{{ post.title }}</a>   </li>
+{% endfor %}
+</ul>
+<!-- 分页链接 -->
+<div class="pagination">
+{% if paginator.previous_page %}
+<a href="/page{{ paginator.previous_page }}" class="previous">Previous</a>
+{% else %}
+<span class="previous">Previous</span>
+{% endif %}
+<span class="page_number ">Page: {{ paginator.page }} of {{ paginator.total_pages }}</span>
+{% if paginator.next_page %}
+<a href="/page{{ paginator.next_page }}" class="next">Next</a>
+{% else %}
+<span class="next ">Next</span>
+{% endif %}
+</div>
+
+
+
+
+
