@@ -20,14 +20,26 @@ tagline:
    <div class="pagenavi"> 
     <span class="page_number">Page {{paginator.page}} of {{paginator.total_pages}}</span> 
    <!-- <a href="/">First</a>  -->
-    {% if paginator.previous_page %} {% if paginator.previous_page == 1 %}
-    <a href="/" class="current">&lt;</a> {% else %} 
-    <a href="/page{{paginator.previous_page}}">&lt;</a> {% endif %} {% else %} 
-    <span>&lt;</span> {% endif %} {% for count in (2..paginator.total_pages) limit:8 %} {% if count == paginator.page %} 
-    <span class="current-page">{{count}}</span> {% else %} 
-    <a href="/page{{count}}">{{count}}</a> {% endif %} {% endfor %} {% if paginator.next_page %} 
-    <a href="/page{{paginator.next_page}}">&gt;</a> {% else %} 
-    <span>&gt;</span> {% endif %} 
+    {% if paginator.previous_page %} 
+	    {% if paginator.previous_page == 1 %}
+	    <a href="/" class="current">&lt;</a> 
+	    {% else %} 
+	    <a href="/page{{paginator.previous_page}}">&lt;</a> 
+	    {% endif %} 
+    {% else %} 
+    	<span>&lt;</span> 
+    {% endif %} 
+    {% for count in (2..paginator.total_pages) limit:8 %} 
+	    {% if count == paginator.page %} 
+	    	<span class="current-page">{{count}}</span> 
+	    {% else %} 
+	    	<a href="/page{{count}}">{{count}}</a> 
+	    {% endif %}
+    {% endfor %} 
+    {% if paginator.next_page %} 
+    	<a href="/page{{paginator.next_page}}">&gt;</a> {% else %} 
+    	<span>&gt;</span> 
+    {% endif %} 
     <!-- <a href="/page{{paginator.total_pages}}">Last</a> -->
    </div> 
   </div>
