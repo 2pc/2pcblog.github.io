@@ -15,22 +15,23 @@ tagline:
     <li>  <span>{{ post.date | date_to_string }}</span> &raquo; {{ post.draft_flag }}  <a href="{{ BASE_PATH }}{{ post.url }}">{{ post.title }}</a>   </li>
 {% endfor %}
 </ul>
-<!-- 分页链接 -->
-<div class="pagination">
-{% if paginator.previous_page %}
-<a href="/page{{ paginator.previous_page }}" class="previous">Previous</a>
-{% else %}
-<span class="previous">Previous</span>
-{% endif %}
-<span class="page_number ">Page: {{ paginator.page }} of {{ paginator.total_pages }}</span>
-{% if paginator.next_page %}
-<a href="/page{{ paginator.next_page }}" class="next">Next</a>
-{% else %}
-<span class="next ">Next</span>
-{% endif %}
-</div>
+<!-- 分页链接-->
+  <div id="pagination"> 
+   <div class="pagenavi"> 
+    <span class="page_number">Page {{paginator.page}} of {{paginator.total_pages}}</span> 
+   <!-- <a href="/">First</a>  -->
+    {% if paginator.previous_page %} {% if paginator.previous_page == 1 %}
+    <a href="/" class="current">&lt;</a> {% else %} 
+    <a href="/page{{paginator.previous_page}}">&lt;</a> {% endif %} {% else %} 
+    <span>&lt;</span> {% endif %} {% for count in (2..paginator.total_pages) limit:8 %} {% if count == paginator.page %} 
+    <span class="current-page">{{count}}</span> {% else %} 
+    <a href="/page{{count}}">{{count}}</a> {% endif %} {% endfor %} {% if paginator.next_page %} 
+    <a href="/page{{paginator.next_page}}">&gt;</a> {% else %} 
+    <span>&gt;</span> {% endif %} 
+    <!-- <a href="/page{{paginator.total_pages}}">Last</a> -->
+   </div> 
+  </div>
 
 
 
-
-
+<!-- -->
