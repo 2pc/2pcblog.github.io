@@ -145,4 +145,8 @@ otter.manager.monitor.email.stmp.port = 465
 
 #### 注意
 
-钉钉自定义机器人的消息长度貌似有限制，官网说是content最大长度5000，实际7000+多貌似也发送成功了，线上4000
+钉钉自定义机器人的消息长度貌似有限制，官网说是content最大长度5000，实际测试貌似是20000
+
+```
+String ddMsg = msg.substring(0,20001);
+```
