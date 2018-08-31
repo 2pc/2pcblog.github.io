@@ -1,3 +1,12 @@
+---
+title: Streamsets 源码流程梳理
+tagline: ""
+category : Java
+layout: post
+tags : [Java, streamsets, realtime]
+---
+
+
 #### 启动入口,模块bootstrap
 [BootstrapMain.java](https://github.com/streamsets/datacollector/blob/master/bootstrap/src/main/java/com/streamsets/pipeline/BootstrapMain.java)
 
