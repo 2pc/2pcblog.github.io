@@ -64,4 +64,5 @@ spring.sleuth.sampler.percentage: 1.0
 spring.cloud.stream.kafka.binder.brokers: 1172.28.3.159:9092,172.28.3.158:9092
 spring.cloud.stream.kafka.binder.zkNodes: 172.28.3.169:2181/kafkaroot
 ```
+[github-distributed-tracing](https://github.com/2pc/SpringCloudNotes/tree/master/distributed-tracing)
 
