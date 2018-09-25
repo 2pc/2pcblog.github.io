@@ -61,7 +61,8 @@ tags: ["python","python"]
 ```
 
   原本用pyspider的response应该就可以了，response.doc返回的本来就是PyQuery，于是遍历所有tr,然后遍历tr内的td获取text就好了，     
-  发现有的td内部有span标签的会获取不到数据，有很多td的text本来就是，又不能直接用doc获取整个页面的td计算，也想过直接用etree,   
+  发现 1)有的td内部有span标签的会获取不到数据,2) 有很多td的text本来就是空的，二期也没有表头，不能直接用doc获取整个页面的td计算，
+  也想过直接用etree,lxml.html   
 没招了，只好试一试BeautifulSoup
 
 详细代码
