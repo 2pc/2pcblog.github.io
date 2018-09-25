@@ -181,3 +181,22 @@ for item in response.doc('.confluenceTable').items():
     print len(td_data)
     print  '======================='
 ```
+最后入库数据，大概是这个样子
+
+```
+*************************** 19. row ***************************
+   fid: 3052
+  furl: http://abc.xyz.com/pages/viewpage.action?pageId=24841569
+ftitle: 【20180903】腾讯云-照片比对接口对接 - 风控业务需求 - Confluence
+ fname: sourcePhotoType
+ ftype: String
+ fdesc: 比对源照片类型1：网纹照2：高清照
+*************************** 20. row ***************************
+   fid: 3053
+  furl: http://abc.xyz.com/pages/viewpage.action?pageId=24841569
+ftitle: 【20180903】腾讯云-照片比对接口对接 - 风控业务需求 - Confluence
+ fname: sourcePhotoType
+ ftype: String
+ fdesc: 比对源照片类型1：网纹照2：高清照
+20 rows in set (0.01 sec)
+```
