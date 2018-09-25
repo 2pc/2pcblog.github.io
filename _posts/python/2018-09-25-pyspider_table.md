@@ -7,7 +7,7 @@ category: "python"
 tags: ["python","python"]
 ---
 
-主要爬取接口参数，字段，说明信息，每个页面有很多个下面这种类似的表
+主要爬取一些第三方接口参数，字段，说明信息，有很多个下面这种类似的页面，这些都是table数据
 ```
 <table class="confluenceTable">
     <colgroup>
