@@ -135,7 +135,7 @@ for item in response.doc('.confluenceTable').items():
 for i in range(len(item('td'))):
         field_name = th_dict[i%len(th_dict)]
        # print i,th_count,th_dict[i%th_count]
-       #这个 item('td')[i].text很多时候获取不到数据
+       #这个 item('td')[i].text很多时候(内部有 <span></span>标签)获取不到数据
         if item('td')[i] is not None and item('td')[i].text is not None:
 
             index = i%len(th_dict);
