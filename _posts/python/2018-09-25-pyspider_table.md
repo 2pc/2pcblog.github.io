@@ -1,4 +1,11 @@
-
+---
+layout: post
+title: "pyspider爬取并解析网页中table数据的例子"
+keywords: ["python"]
+description: "python"
+category: "python"
+tags: ["python","python"]
+---
 
 主要爬取接口参数，字段，说明信息，每个页面有很多个下面这种类似的表
 ```
@@ -118,4 +125,58 @@ def parse_tddata_to_dict(self,table_header_dict,trs):
     #print len(ret_list)
     #print ret_list
     return ret_list;
+```
+
+直接用PyQuery获取不到不知道为啥，
+
+```
+for item in response.doc('.confluenceTable').items():
+for i in range(len(item('td'))):
+        field_name = th_dict[i%len(th_dict)]
+       # print i,th_count,th_dict[i%th_count]
+       #这个 item('td')[i].text很多时候获取不到数据
+        if item('td')[i] is not None and item('td')[i].text is not None:
+
+            index = i%len(th_dict);
+            field_name = th_dict[index]
+            if 'name' in field_name or 'type' in field_name or 'desc' in field_name:
+                td_data[field_name]=item('td')[i].text.encode("utf-8")
+        else:
+            print th_dict[i%len(th_dict)] +' no data'
+            if 'name' in field_name or 'type' in field_name or 'desc' in field_name:
+                field_name = th_dict[i%len(th_dict)]
+                td_data[field_name]='null'
+
+        if i>0 and i%len(th_dict) ==0:
+            print td_data
+            td_data_list.append(td_data)
+            td_data = {}
+            td_data['url'] =url
+            td_data['title'] =title
+
+
+
+    print td_data_list
+```
+用lxml.html应该也可以的
+
+```
+for item in response.doc('.confluenceTable').items():
+    root = lxml.html.fromstring(item.html())
+    print "th  header"
+    header_data = root.xpath('//tr/th//text()')
+    print '======================='
+    print 'len(header_data):'
+    print len(header_data)
+    print "td data"
+    td_data = root.xpath('//tr/td//text()')
+    '''
+    for row in root.xpath('//tr/td//text()'):
+        print([i for i in row.itertext()])
+    '''
+
+
+    print 'len(td_data):'
+    print len(td_data)
+    print  '======================='
 ```
