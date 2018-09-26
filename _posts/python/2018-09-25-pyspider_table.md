@@ -363,5 +363,36 @@ for table in tables:
     print   table.parent.parent.name =='td'
 ```
 
-遍历tr
+遍历tr，td,还需要校验下th,td的长度。最后问题是如果没有th,或者th长度有问题。。。
+
+```
+b4s_body = BeautifulSoup(response.doc.html())
+tables = b4s_body.find_all('table')
+for table in tables:
+    #print  table 
+    if table.parent.parent.name =='td':
+        print 'skip table: '
+        print table
+        continue          
+
+    table_childrens = table.children 
+    for table_children in table_childrens:
+        is_tbody = table_children.name =='tbody'
+        if is_tbody:
+            trs = table_children.children
+            for tr in trs:
+                ths = tr.find_all('th',recursive=False)
+                tds = tr.find_all('td',recursive=False)
+                if len(ths)>0:
+                    print 'len(ths)'
+                    print len(ths)
+                elif len(tds)>0:
+                    print 'len(tds)'
+                    print len(tds)
+                else:
+                    print 'no trs tds'
+        else:
+            print 'no tbody:'
+            print table_children
+```
 
