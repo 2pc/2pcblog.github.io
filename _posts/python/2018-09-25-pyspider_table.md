@@ -363,7 +363,7 @@ for table in tables:
     print   table.parent.parent.name =='td'
 ```
 
-遍历tr，td,还需要校验下th,td的长度。最后问题是如果没有th,或者th长度有问题。。。
+遍历tr，td,还需要校验下th,td的长度(注意查找的时候设置参数recursive=False，不查找内部的嵌套tr,td))。最后问题是如果没有th,或者th长度有问题。。。
 
 ```
 b4s_body = BeautifulSoup(response.doc.html())
