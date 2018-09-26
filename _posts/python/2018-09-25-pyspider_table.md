@@ -200,3 +200,168 @@ ftitle: 【20180903】腾讯云-照片比对接口对接 - 风控业务需求 - 
  fdesc: 比对源照片类型1：网纹照2：高清照
 20 rows in set (0.01 sec)
 ```
+
+# 获取嵌套table的数据
+
+```
+<div class="table-wrap">
+ <table class="wrapped confluenceTable">
+  <colgroup>
+   <col />
+   <col />
+   <col />
+   <col />
+  </colgroup>
+  <tbody>
+   <tr>
+    <th class="confluenceTh">序号</th>
+    <th class="confluenceTh">服务</th>
+    <th class="confluenceTh">说明</th>
+    <th colspan="1" class="confluenceTh">服务类型</th>
+   </tr>
+   <tr>
+    <td class="confluenceTd">01</td>
+    <td class="confluenceTd">查询接口</td>
+    <td class="confluenceTd">征信中心封装查询接口给前端请求同盾H5链接</td>
+    <td rowspan="2" class="confluenceTd">查询接口</td>
+   </tr>
+   <tr>
+    <td class="confluenceTd">02</td>
+    <td class="confluenceTd">查询接口</td>
+    <td class="confluenceTd">征信中心将拿到的H5链接返回给前端</td>
+   </tr>
+   <tr>
+    <td class="confluenceTd">03</td>
+    <td class="confluenceTd">接收同盾登陆成功的回调</td>
+    <td class="confluenceTd"><br /></td>
+    <td colspan="1" class="confluenceTd">回调接口</td>
+   </tr>
+   <tr>
+    <td colspan="1" class="confluenceTd">04</td>
+    <td colspan="1" class="confluenceTd">接收同盾抓取原始数据成功的回调</td>
+    <td colspan="1" class="confluenceTd"><p><br /></p></td>
+    <td colspan="1" class="confluenceTd">回调接口</td>
+   </tr>
+   <tr>
+    <td colspan="1" class="confluenceTd">05</td>
+    <td colspan="1" class="confluenceTd">请求数据</td>
+    <td colspan="1" class="confluenceTd">主动请求同盾的接口获取数据</td>
+    <td colspan="1" class="confluenceTd"><br /></td>
+   </tr>
+   <tr>
+    <td colspan="1" class="confluenceTd">06</td>
+    <td colspan="1" class="confluenceTd">数据逻辑</td>
+    <td colspan="1" class="confluenceTd">落mongo</td>
+    <td colspan="1" class="confluenceTd"><br /></td>
+   </tr>
+   <tr>
+    <td colspan="1" class="confluenceTd">07</td>
+    <td colspan="1" class="confluenceTd">查询接口</td>
+    <td colspan="1" class="confluenceTd">封装查询接口供请求方获取taskid</td>
+    <td colspan="1" class="confluenceTd">查询接口</td>
+   </tr>
+   <tr>
+    <td colspan="1" class="confluenceTd">08</td>
+    <td colspan="1" class="confluenceTd">查询接口</td>
+    <td colspan="1" class="confluenceTd"><span>封装查询接口供请求方获取运营商数据或中间状态</span></td>
+    <td colspan="1" class="confluenceTd"><br /></td>
+   </tr>
+  </tbody>
+ </table>
+</div>
+<div class="table-wrap">
+ <table class="wrapped confluenceTable">
+  <colgroup>
+   <col style="width: 94.0px;" />
+   <col style="width: 77.0px;" />
+   <col style="width: 119.0px;" />
+  </colgroup>
+  <tbody>
+   <tr>
+    <td class="highlight-grey confluenceTd" data-highlight-colour="grey"><p>参数</p></td>
+    <td class="highlight-grey confluenceTd" colspan="1" data-highlight-colour="grey">是否必传</td>
+    <td class="highlight-grey confluenceTd" data-highlight-colour="grey"><p>含义</p></td>
+   </tr>
+   <tr>
+    <td class="confluenceTd"><p>appid</p></td>
+    <td colspan="1" class="confluenceTd"><span>Y</span></td>
+    <td class="confluenceTd"><p>业务线Spuid</p></td>
+   </tr>
+   <tr>
+    <td class="confluenceTd"><p>taskId</p></td>
+    <td colspan="1" class="confluenceTd"><span>Y</span></td>
+    <td class="confluenceTd"><p>任务id</p></td>
+   </tr>
+   <tr>
+    <td colspan="1" class="confluenceTd"><span>transationId</span></td>
+    <td colspan="1" class="confluenceTd"><span>Y</span></td>
+    <td colspan="1" class="confluenceTd"><p>请求的唯一标识</p></td>
+   </tr>
+  </tbody>
+ </table>
+</div>
+<h3 class="auto-cursor-target" id="id-【20180830】同盾运营商数据对接-回调通知">回调通知</h3>
+<p>我们可以截取用户提交成功、原始报告获取结果（成功、失败、超时），魔方报告（成功、失败）。</p>
+
+<div class="table-wrap">
+ <table class="confluenceTable">
+  <colgroup>
+   <col />
+   <col />
+   <col />
+  </colgroup>
+  <tbody>
+   <tr>
+    <th class="confluenceTh">字段名称</th>
+    <th colspan="1" class="confluenceTh"><span style="color: rgb(51,51,51);text-decoration: none;">类型</span></th>
+    <th class="confluenceTh"><span style="color: rgb(51,51,51);text-decoration: none;">字段说明</span></th>
+   </tr>
+   <tr>
+    <td class="confluenceTd">notify_event</td>
+    <td colspan="1" class="confluenceTd">String</td>
+    <td class="confluenceTd">通知事件</td>
+   </tr>
+   <tr>
+    <td class="confluenceTd">notify_type</td>
+    <td colspan="1" class="confluenceTd">String</td>
+    <td class="confluenceTd"><p class="auto-cursor-target">通知类型</p>
+     <div class="table-wrap">
+      <table class="confluenceTable">
+       <tbody>
+        <tr>
+         <th class="confluenceTh">参数</th>
+         <th class="confluenceTh">说明</th>
+        </tr>
+        <tr>
+         <td class="confluenceTd">ACQUIRE</td>
+         <td class="confluenceTd">任务创建 CREATED、任务成功 SUCCESS、任务失败 FAILURE、<br />任务超时 TIMEOUT</td>
+        </tr>
+        <tr>
+         <td class="confluenceTd">REPORT</td>
+         <td class="confluenceTd">生成成功 SUCCESS、生成失败 FAILURE</td>
+        </tr>
+       </tbody>
+      </table>
+     </div></td>
+   </tr>
+</tbody>
+</table>
+</div>
+        
+```
+
+这里第一个表不是规整的表，第二行少一列，只有三个td标签
+
+可以看到有个td里还包含一个table,结构都差不多，直接用find_all()不管是table,tr还是td都会有问题
+
+可以通过parent的parent来判断：内嵌的parent.parent应该是td标签
+
+```
+tables = b4s_body.find_all('table')
+for table in tables:
+    print  table 
+    print   table.parent.parent.name =='td'
+```
+
+遍历tr
+
