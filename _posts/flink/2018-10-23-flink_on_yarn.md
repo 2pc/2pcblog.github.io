@@ -17,7 +17,7 @@ export HADOOP_CONF_DIR=/opt/soft/yarn-conf
 ./yarn-session.sh -n 8 -s 8 -jm 1024 -tm 1024 -nm flink –d
 ```
 
-### start job 
+### Submit a job to YARN
 
 ```
 wget -O LICENSE-2.0.txt http://www.apache.org/licenses/LICENSE-2.0.txt
