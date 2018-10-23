@@ -11,8 +11,16 @@ tags : [flink, streamsets, realtime]
 ```
 export HADOOP_CONF_DIR=/opt/soft/yarn-conf
 ```
-### yarn-session 启动
+### start yarn-session
 
 ```
 ./yarn-session.sh -n 8 -s 8 -jm 1024 -tm 1024 -nm flink –d
+```
+
+### start job 
+
+```
+wget -O LICENSE-2.0.txt http://www.apache.org/licenses/LICENSE-2.0.txt
+hadoop fs -copyFromLocal LICENSE-2.0.txt /tmp
+./bin/flink run ./examples/batch/WordCount.jar --input hdfs:///tmp/LICENSE-2.0.txt  --output  hdfs:///tmp/wordcount-result.txt
 ```
