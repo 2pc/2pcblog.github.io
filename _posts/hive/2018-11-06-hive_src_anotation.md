@@ -1,3 +1,10 @@
+---
+title: Hive源码流程分析
+tagline: ""
+category : [Java, Hive]
+layout: post
+tags : [Java, Hive]
+---
 
 #### 主要流程
 
