@@ -1,3 +1,10 @@
+---
+title: Flink  Yarn Session的启动
+tagline: ""
+category : flink
+layout: post
+tags : [flink, yarn, realtime]
+---
 flink  yarn session的启动
 
 ```
