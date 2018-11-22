@@ -6,7 +6,6 @@ layout: post
 tags : [flink, yarn, realtime]
 ---
 # flink  yarn session的启动
-## flink  yarn session的启动
 
 ```
 bin/yarn-session.sh -n 3 -s 4 -jm 4096m -tm 4096m -nm flink-1.6.0 –d
@@ -138,7 +137,7 @@ private AbstractYarnClusterDescriptor getClusterDescriptor(
   yarnClient.init(yarnConfiguration);
   yarnClient.start();
 ```
-### 2，有了这个yarnClient就可以create an application, and get its application id
+### 2, 有了这个yarnClient就可以create an application, and get its application id
 
 ```
 clusterClient = yarnClusterDescriptor.deploySessionCluster(clusterSpecification);
@@ -165,7 +164,7 @@ protected ClusterClient<ApplicationId> deployInternal(){
 }
 
 ```
-### 3,两个主要的context: ApplicationSubmissionContext与ContainerLaunchContext,
+### 3, 两个主要的context: ApplicationSubmissionContext与ContainerLaunchContext,
 
 ```
 //org.apache.flink.yarn.AbstractYarnClusterDescriptor.java：部分代码
@@ -190,7 +189,7 @@ public ApplicationReport startAppMaster(){
 }
 ```
 
-### 4，有了yarnclient与appcontext就可以submit the application
+### 4, 有了yarnclient与appcontext就可以submit the application
 
 ```
 yarnClient.submitApplication(appContext);
@@ -198,7 +197,7 @@ yarnClient.submitApplication(appContext);
 ```
 在此之后会启动一个amcontainer来启动ApplicationMaster,flink里的am是启动YarnApplicationMasterRunner
 
-### 5,Get application report
+### 5, Get application report
 
 ```
 try {
