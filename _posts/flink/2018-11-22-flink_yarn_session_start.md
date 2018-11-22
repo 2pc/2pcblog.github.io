@@ -5,7 +5,6 @@ category : flink
 layout: post
 tags : [flink, yarn, realtime]
 ---
-# flink  yarn session的启动
 
 ```
 bin/yarn-session.sh -n 3 -s 4 -jm 4096m -tm 4096m -nm flink-1.6.0 –d
@@ -196,6 +195,8 @@ yarnClient.submitApplication(appContext);
 
 ```
 在此之后会启动一个amcontainer来启动ApplicationMaster,flink里的am是启动YarnApplicationMasterRunner
+
+比如yarn里,可以通过default_container_executor.sh等方式 启动一个container
 
 ### 5, Get application report
 
