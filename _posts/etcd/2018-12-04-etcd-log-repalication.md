@@ -7,6 +7,8 @@ category: "distributed"
 tags: ["etcd"]
 ---
 
+过半数逻辑的优化pr: 
+
 ![maybeCommit](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/maybeCommit.jpg)
 
 r.quorum()取半数以上
