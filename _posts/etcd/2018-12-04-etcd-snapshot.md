@@ -249,3 +249,34 @@ func (rc *raftNode) serveChannels() {
 	}
 }
 ```
+
+
+注意，如果当前Follower需要append的term与entries找不到，也就是被snapshot了，那么会直接转换成发送MsgSnap，发送当前的snapshot
+
+```
+if errt != nil || erre != nil { // send snapshot if we failed to get term or entries
+	if !pr.RecentActive {
+		r.logger.Debugf("ignore sending snapshot to %x since it is not recently active", to)
+		return false
+	}
+
+	m.Type = pb.MsgSnap//
+	snapshot, err := r.raftLog.snapshot()//获取snapshot
+	if err != nil {
+		if err == ErrSnapshotTemporarilyUnavailable {
+			r.logger.Debugf("%x failed to send snapshot to %x because snapshot is temporarily unavailable", r.id, to)
+			return false
+		}
+		panic(err) // TODO(bdarnell)
+	}
+	if IsEmptySnap(snapshot) {
+		panic("need non-empty snapshot")
+	}
+	m.Snapshot = snapshot//要发送额snapshot
+	sindex, sterm := snapshot.Metadata.Index, snapshot.Metadata.Term
+	r.logger.Debugf("%x [firstindex: %d, commit: %d] sent snapshot[index: %d, term: %d] to %x [%s]",
+		r.id, r.raftLog.firstIndex(), r.raftLog.committed, sindex, sterm, to, pr)
+	pr.becomeSnapshot(sindex)
+	r.logger.Debugf("%x paused sending replication messages to %x [%s]", r.id, to, pr)
+else{...}
+```
