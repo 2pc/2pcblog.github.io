@@ -7,7 +7,7 @@ category: "distributed"
 tags: ["etcd"]
 ---
 
-过半数逻辑的优化pr: 
+半数或以上的计算是将所有的index排序后，取中间的index的大小比较？以下是过半数逻辑的优化pr: 
 
 ![maybeCommit](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/maybeCommit.jpg)
 
