@@ -62,3 +62,37 @@ https://github.com/hhurz/tableExport.jquery.plugin/commit/8a314017d803f03dd18dd5
 ```
 "file-saver": ">=1.2.0",
 ```
+附：[npmjs-tableexport.jquery.plugin](https://www.npmjs.com/package/tableexport.jquery.plugin)
+
+```
+Exception in thread "main" java.lang.InstantiationError: org.eclipse.jetty.util.component.Container
+        at org.eclipse.jetty.server.Server.<init>(Server.java:66)
+        at org.apache.zeppelin.server.ZeppelinServer.setupJettyServer(ZeppelinServer.java:224)
+        at org.apache.zeppelin.server.ZeppelinServer.main(ZeppelinServer.java:142)
+```
+包的问题，引入了多余的包jetty-all-7.6.0.v20120127.jar,这个是hive-jdbc依赖的hive-service引入的，exclusion掉吧
+
+```
+# ls lib/jetty-
+jetty-6.1.26.jar                     jetty-client-9.2.15.v20160210.jar    jetty-io-9.2.15.v20160210.jar        jetty-server-9.2.15.v20160210.jar    jetty-util-6.1.26.jar                jetty-webapp-9.2.15.v20160210.jar
+jetty-all-7.6.0.v20120127.jar        jetty-http-9.2.15.v20160210.jar      jetty-security-9.2.15.v20160210.jar  jetty-servlet-9.2.15.v20160210.jar   jetty-util-9.2.15.v20160210.jar      jetty-xml-9.2.15.v20160210.jar
+```
+slf4j依赖重复问题
+
+```
+<!--
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
+-->
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+    </dependency>
+```
