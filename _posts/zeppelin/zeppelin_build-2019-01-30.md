@@ -1,3 +1,12 @@
+---
+title: Building Zeppelin from source
+tagline: ""
+category : zeppelin
+layout: post
+tags : [zeppelin]
+---
+
+
 编译，这里使用的zeppelin-0.8.0的zip包,如果直接使用0.8.0的all包注意jdk版本不能低于jdk1.8.0_144 ，反编译javax.ws是基于这个版本编译的
 
 ```
