@@ -1,3 +1,10 @@
+---
+title: Spark Thrift 原理
+tagline: "spark"
+category : spark
+layout: post
+tags : [Spark thrift]
+---
 hive jdbc client
 
 
