@@ -120,4 +120,233 @@ String httpPath = getHttpPath(hiveConf
 httpServer.setHandler(context);
 context.addServlet(new ServletHolder(thriftHttpServlet), httpPath);
 ```
-ThriftBinaryCLIService里边的
+在TServlet的post看到processor的处理逻辑
+
+```
+protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    TTransport inTransport = null;
+    Object var4 = null;
+
+    try {
+        response.setContentType("application/x-thrift");
+        if (null != this.customHeaders) {
+            Iterator i$ = this.customHeaders.iterator();
+
+            while(i$.hasNext()) {
+                Entry<String, String> header = (Entry)i$.next();
+                response.addHeader((String)header.getKey(), (String)header.getValue());
+            }
+        }
+
+        InputStream in = request.getInputStream();
+        OutputStream out = response.getOutputStream();
+        TTransport transport = new TIOStreamTransport(in, out);
+        TProtocol inProtocol = this.inProtocolFactory.getProtocol(transport);
+        TProtocol outProtocol = this.outProtocolFactory.getProtocol(transport);
+        this.processor.process(inProtocol, outProtocol);
+        out.flush();
+    } catch (TException var10) {
+        throw new ServletException(var10);
+    }
+}
+```
+ThriftBinaryCLIService里边的不是直接使用的processor 而是processorFactory
+
+```
+TTransportFactory transportFactory = hiveAuthFactory.getAuthTransFactory();
+TProcessorFactory processorFactory = hiveAuthFactory.getAuthProcFactory(this);
+TThreadPoolServer.Args sargs = new TThreadPoolServer.Args(serverSocket)
+    .processorFactory(processorFactory).transportFactory(transportFactory)
+    .protocolFactory(new TBinaryProtocol.Factory())
+    .inputProtocolFactory(new TBinaryProtocol.Factory(true, true, maxMessageSize, maxMessageSize))
+    .requestTimeout(requestTimeout).requestTimeoutUnit(TimeUnit.SECONDS)
+    .beBackoffSlotLength(beBackoffSlotLength).beBackoffSlotLengthUnit(TimeUnit.MILLISECONDS)
+    .executorService(executorService);
+
+// TCP Server
+server = new TThreadPoolServer(sargs);
+server.setServerEventHandler(serverEventHandler);
+String msg = "Starting " + ThriftBinaryCLIService.class.getSimpleName() + " on port "
+    + portNum + " with " + minWorkerThreads + "..." + maxWorkerThreads + " worker threads";
+LOG.info(msg);
+server.serve();
+```
+
+这个factory也份两种形式 
+
+```
+public TProcessorFactory getAuthProcFactory(ThriftCLIService service) throws LoginException {
+  if (authTypeStr.equalsIgnoreCase(AuthTypes.KERBEROS.getAuthName())) {
+    return KerberosSaslHelper.getKerberosProcessorFactory(saslServer, service);
+  } else {
+    return PlainSaslHelper.getPlainProcessorFactory(service);
+  }
+}
+//KerberosSaslHelper
+public static TProcessorFactory getKerberosProcessorFactory(Server saslServer,
+  ThriftCLIService service) {
+  return new CLIServiceProcessorFactory(saslServer, service);
+}
+//PlainSaslHelper
+public static TProcessorFactory getPlainProcessorFactory(ThriftCLIService service) {
+  return new SQLPlainProcessorFactory(service);
+}
+```
+CLIServiceProcessorFactory与SQLPlainProcessorFactory都继承自TProcessorFactory
+
+```
+private KerberosSaslHelper() {
+  throw new UnsupportedOperationException("Can't initialize class");
+}
+
+private static class CLIServiceProcessorFactory extends TProcessorFactory {
+
+  private final ThriftCLIService service;
+  private final Server saslServer;
+
+  CLIServiceProcessorFactory(Server saslServer, ThriftCLIService service) {
+    super(null);
+    this.service = service;
+    this.saslServer = saslServer;
+  }
+
+  @Override
+  public TProcessor getProcessor(TTransport trans) {
+    TProcessor sqlProcessor = new TCLIService.Processor<Iface>(service);
+    return saslServer.wrapNonAssumingProcessor(sqlProcessor);
+  }
+}
+private static final class SQLPlainProcessorFactory extends TProcessorFactory {
+
+  private final ThriftCLIService service;
+
+  SQLPlainProcessorFactory(ThriftCLIService service) {
+    super(null);
+    this.service = service;
+  }
+
+  @Override
+  public TProcessor getProcessor(TTransport trans) {
+    return new TSetIpAddressProcessor<Iface>(service);
+  }
+}
+```
+TSetIpAddressProcessor也是继承自TCLIService.Processor，这里讲了这么多Processor，看下里边具体的定义
+
+```
+private static <I extends Iface> Map<String,  org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> getProcessMap(Map<String,  org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> processMap) {
+  processMap.put("OpenSession", new OpenSession());
+  processMap.put("CloseSession", new CloseSession());
+  processMap.put("GetInfo", new GetInfo());
+  processMap.put("ExecuteStatement", new ExecuteStatement());
+  processMap.put("GetTypeInfo", new GetTypeInfo());
+  processMap.put("GetCatalogs", new GetCatalogs());
+  processMap.put("GetSchemas", new GetSchemas());
+  processMap.put("GetTables", new GetTables());
+  processMap.put("GetTableTypes", new GetTableTypes());
+  processMap.put("GetColumns", new GetColumns());
+  processMap.put("GetFunctions", new GetFunctions());
+  processMap.put("GetOperationStatus", new GetOperationStatus());
+  processMap.put("CancelOperation", new CancelOperation());
+  processMap.put("CloseOperation", new CloseOperation());
+  processMap.put("GetResultSetMetadata", new GetResultSetMetadata());
+  processMap.put("FetchResults", new FetchResults());
+  processMap.put("GetDelegationToken", new GetDelegationToken());
+  processMap.put("CancelDelegationToken", new CancelDelegationToken());
+  processMap.put("RenewDelegationToken", new RenewDelegationToken());
+  return processMap;
+}
+```
+ExecuteStatement应该不陌生，就是前面client提交过来的method了，在里还有这么一段代码
+
+```
+public boolean process(TProtocol in, TProtocol out) throws TException {
+    TMessage msg = in.readMessageBegin();
+    ProcessFunction fn = (ProcessFunction)this.processMap.get(msg.name);
+    if (fn == null) {
+        TProtocolUtil.skip(in, (byte)12);
+        in.readMessageEnd();
+        TApplicationException x = new TApplicationException(1, "Invalid method name: '" + msg.name + "'");
+        out.writeMessageBegin(new TMessage(msg.name, (byte)3, msg.seqid));
+        x.write(out);
+        out.writeMessageEnd();
+        out.getTransport().flush();
+        return true;
+    } else {
+        fn.process(msg.seqid, in, out, this.iface);
+        return true;
+    }
+}
+//ProcessFunction
+public final void process(int seqid, TProtocol iprot, TProtocol oprot, I iface) throws TException {
+    TBase args = this.getEmptyArgsInstance();
+
+    try {
+        args.read(iprot);
+    } catch (TProtocolException var10) {
+        iprot.readMessageEnd();
+        TApplicationException x = new TApplicationException(7, var10.getMessage());
+        oprot.writeMessageBegin(new TMessage(this.getMethodName(), (byte)3, seqid));
+        x.write(oprot);
+        oprot.writeMessageEnd();
+        oprot.getTransport().flush();
+        return;
+    }
+
+    iprot.readMessageEnd();
+    TBase result = null;
+
+    try {
+        result = this.getResult(iface, args);
+    } catch (TException var9) {
+        LOGGER.error("Internal error processing " + this.getMethodName(), var9);
+        TApplicationException x = new TApplicationException(6, "Internal error processing " + this.getMethodName());
+        oprot.writeMessageBegin(new TMessage(this.getMethodName(), (byte)3, seqid));
+        x.write(oprot);
+        oprot.writeMessageEnd();
+        oprot.getTransport().flush();
+        return;
+    }
+
+    if (!this.isOneway()) {
+        oprot.writeMessageBegin(new TMessage(this.getMethodName(), (byte)2, seqid));
+        result.write(oprot);
+        oprot.writeMessageEnd();
+        oprot.getTransport().flush();
+    }
+
+}
+```
+这个getResult是关键,就是map对应的，这里以上面的ExecuteStatement为例
+```
+  public ExecuteStatement_result getResult(I iface, ExecuteStatement_args args) throws org.apache.thrift.TException {
+      ExecuteStatement_result result = new ExecuteStatement_result();
+      result.success = iface.ExecuteStatement(args.req);
+      return result;
+    }
+    }
+```
+iface就是服务端实现了
+
+```
+//ThriftCLIService
+public TExecuteStatementResp ExecuteStatement(TExecuteStatementReq req) throws TException {
+  TExecuteStatementResp resp = new TExecuteStatementResp();
+  try {
+    SessionHandle sessionHandle = new SessionHandle(req.getSessionHandle());
+    String statement = req.getStatement();
+    Map<String, String> confOverlay = req.getConfOverlay();
+    Boolean runAsync = req.isRunAsync();
+    OperationHandle operationHandle = runAsync ?
+        cliService.executeStatementAsync(sessionHandle, statement, confOverlay)
+        : cliService.executeStatement(sessionHandle, statement, confOverlay);
+        resp.setOperationHandle(operationHandle.toTOperationHandle());
+        resp.setStatus(OK_STATUS);
+  } catch (Exception e) {
+    LOG.warn("Error executing statement: ", e);
+    resp.setStatus(HiveSQLException.toTStatus(e));
+  }
+  return resp;
+}
+```
+这个cliService不就是init里边放进去的SparkSQLCLIService吗，其父类是CLIService，注意区分前面的TCLIService
