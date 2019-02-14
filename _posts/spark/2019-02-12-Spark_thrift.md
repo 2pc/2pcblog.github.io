@@ -414,4 +414,57 @@ override def init(hiveConf: HiveConf) {
   initCompositeService(hiveConf)
 }
 ```
-这里同样也会调用SparkSQLSessionManager的init吧
+这里同样也会调用SparkSQLSessionManager的init吧，
+
+```
+//SparkSQLSessionManager
+override def init(hiveConf: HiveConf) {
+  setSuperField(this, "hiveConf", hiveConf)
+
+  // Create operation log root directory, if operation logging is enabled
+  if (hiveConf.getBoolVar(ConfVars.HIVE_SERVER2_LOGGING_OPERATION_ENABLED)) {
+    invoke(classOf[SessionManager], this, "initOperationLogRootDir")
+  }
+
+  val backgroundPoolSize = hiveConf.getIntVar(ConfVars.HIVE_SERVER2_ASYNC_EXEC_THREADS)
+  setSuperField(this, "backgroundOperationPool", Executors.newFixedThreadPool(backgroundPoolSize))
+  getAncestorField[Log](this, 3, "LOG").info(
+    s"HiveServer2: Async execution pool size $backgroundPoolSize")
+
+  setSuperField(this, "operationManager", sparkSqlOperationManager)
+  addService(sparkSqlOperationManager)
+
+  initCompositeService(hiveConf)
+}
+```
+
+这个初始化里添加的service是SparkSQLOperationManager,但是SparkSQLOperationManager本身没有init，只有父类有了
+
+```
+private[thriftserver] class SparkSQLOperationManager()
+  extends OperationManager with Logging {
+
+  val handleToOperation = ReflectionUtils
+    .getSuperField[JMap[OperationHandle, Operation]](this, "handleToOperation")
+
+  val sessionToActivePool = new ConcurrentHashMap[SessionHandle, String]()
+  val sessionToContexts = new ConcurrentHashMap[SessionHandle, SQLContext]()
+
+  override def newExecuteStatementOperation(
+      parentSession: HiveSession,
+      statement: String,
+      confOverlay: JMap[String, String],
+      async: Boolean): ExecuteStatementOperation = synchronized {
+    val sqlContext = sessionToContexts.get(parentSession.getSessionHandle)
+    require(sqlContext != null, s"Session handle: ${parentSession.getSessionHandle} has not been" +
+      s" initialized or had already closed.")
+    val conf = sqlContext.sessionState.conf
+    val runInBackground = async && conf.getConf(HiveUtils.HIVE_THRIFT_SERVER_ASYNC)
+    val operation = new SparkExecuteStatementOperation(parentSession, statement, confOverlay,
+      runInBackground)(sqlContext, sessionToActivePool)
+    handleToOperation.put(operation.getHandle, operation)
+    logDebug(s"Created Operation for $statement with session=$parentSession, " +
+      s"runInBackground=$runInBackground")
+    operation
+  }
+```
