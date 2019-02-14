@@ -350,3 +350,68 @@ public TExecuteStatementResp ExecuteStatement(TExecuteStatementReq req) throws T
 }
 ```
 这个cliService不就是init里边放进去的SparkSQLCLIService吗，其父类是CLIService，注意区分前面的TCLIService
+
+这里需要关注下HiveThriftServer2初始化方法init()里的一段代码
+
+```
+override def init(hiveConf: HiveConf) {
+  val sparkSqlCliService = new SparkSQLCLIService(this, sqlContext)
+  setSuperField(this, "cliService", sparkSqlCliService)
+  addService(sparkSqlCliService)
+
+  val thriftCliService = if (isHTTPTransportMode(hiveConf)) {
+    new ThriftHttpCLIService(sparkSqlCliService)
+  } else {
+    new ThriftBinaryCLIService(sparkSqlCliService)
+  }
+
+  setSuperField(this, "thriftCLIService", thriftCliService)
+  addService(thriftCliService)
+  initCompositeService(hiveConf)
+}
+```
+就是最后这个 initCompositeService(hiveConf)
+
+```
+private[thriftserver] trait ReflectedCompositeService { this: AbstractService =>
+  def initCompositeService(hiveConf: HiveConf) {
+    // Emulating `CompositeService.init(hiveConf)`
+    val serviceList = getAncestorField[JList[Service]](this, 2, "serviceList")
+    serviceList.asScala.foreach(_.init(hiveConf))
+
+    // Emulating `AbstractService.init(hiveConf)`
+    invoke(classOf[AbstractService], this, "ensureCurrentState", classOf[STATE] -> STATE.NOTINITED)
+    setAncestorField(this, 3, "hiveConf", hiveConf)
+    invoke(classOf[AbstractService], this, "changeState", classOf[STATE] -> STATE.INITED)
+    getAncestorField[Log](this, 3, "LOG").info(s"Service: $getName is inited.")
+  }
+}
+```
+会通过反射调用serviceList的init(),一开始添加的两个service都会在这里被init，
+
+看下SparkSQLCLIService的init过程
+
+```
+override def init(hiveConf: HiveConf) {
+  setSuperField(this, "hiveConf", hiveConf)
+
+  val sparkSqlSessionManager = new SparkSQLSessionManager(hiveServer, sqlContext)
+  setSuperField(this, "sessionManager", sparkSqlSessionManager)
+  addService(sparkSqlSessionManager)
+  var sparkServiceUGI: UserGroupInformation = null
+
+  if (UserGroupInformation.isSecurityEnabled) {
+    try {
+      HiveAuthFactory.loginFromKeytab(hiveConf)
+      sparkServiceUGI = Utils.getUGI()
+      setSuperField(this, "serviceUGI", sparkServiceUGI)
+    } catch {
+      case e @ (_: IOException | _: LoginException) =>
+        throw new ServiceException("Unable to login to kerberos with given principal/keytab", e)
+    }
+  }
+
+  initCompositeService(hiveConf)
+}
+```
+这里同样也会调用SparkSQLSessionManager的init吧
