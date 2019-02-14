@@ -348,7 +348,16 @@ public TExecuteStatementResp ExecuteStatement(TExecuteStatementReq req) throws T
   }
   return resp;
 }
+//CLIService
+public OperationHandle executeStatementAsync(SessionHandle sessionHandle, String statement,
+    Map<String, String> confOverlay) throws HiveSQLException {
+  OperationHandle opHandle = sessionManager.getSession(sessionHandle)
+      .executeStatementAsync(statement, confOverlay);
+  LOG.debug(sessionHandle + ": executeStatementAsync()");
+  return opHandle;
+}
 ```
+
 这个cliService不就是init里边放进去的SparkSQLCLIService吗，其父类是CLIService，注意区分前面的TCLIService
 
 这里需要关注下HiveThriftServer2初始化方法init()里的一段代码
