@@ -356,6 +356,14 @@ public OperationHandle executeStatementAsync(SessionHandle sessionHandle, String
   LOG.debug(sessionHandle + ": executeStatementAsync()");
   return opHandle;
 }
+//SessionManager
+public HiveSession getSession(SessionHandle sessionHandle) throws HiveSQLException {
+  HiveSession session = handleToSession.get(sessionHandle);
+  if (session == null) {
+    throw new HiveSQLException("Invalid SessionHandle: " + sessionHandle);
+  }
+  return session;
+}
 ```
 
 这个cliService不就是init里边放进去的SparkSQLCLIService吗，其父类是CLIService，注意区分前面的TCLIService
@@ -475,5 +483,113 @@ private[thriftserver] class SparkSQLOperationManager()
     logDebug(s"Created Operation for $statement with session=$parentSession, " +
       s"runInBackground=$runInBackground")
     operation
+  }
+```
+
+上边的sessionManager应该是SparkSQLSessionManager，这里里边除了init只有两个方法了openSession与closeSession，其实还是调用的父类方法，
+只是封装了下，那获取session就不难找了
+
+```
+  public SessionHandle openSession(TProtocolVersion protocol, String username, String password, String ipAddress,
+      Map<String, String> sessionConf, boolean withImpersonation, String delegationToken)
+          throws HiveSQLException {
+    HiveSession session;
+    // If doAs is set to true for HiveServer2, we will create a proxy object for the session impl.
+    // Within the proxy object, we wrap the method call in a UserGroupInformation#doAs
+    if (withImpersonation) {
+      HiveSessionImplwithUGI sessionWithUGI = new HiveSessionImplwithUGI(protocol, username, password,
+          hiveConf, ipAddress, delegationToken);
+      session = HiveSessionProxy.getProxy(sessionWithUGI, sessionWithUGI.getSessionUgi());
+      sessionWithUGI.setProxySession(session);
+    } else {
+      session = new HiveSessionImpl(protocol, username, password, hiveConf, ipAddress);
+    }
+    session.setSessionManager(this);
+    session.setOperationManager(operationManager);
+    try {
+      session.open(sessionConf);
+    } catch (Exception e) {
+      try {
+        session.close();
+      } catch (Throwable t) {
+        LOG.warn("Error closing session", t);
+      }
+      session = null;
+      throw new HiveSQLException("Failed to open new session: " + e, e);
+    }
+    if (isOperationLogEnabled) {
+      session.setOperationLogSessionDir(operationLogRootDir);
+    }
+    handleToSession.put(session.getSessionHandle(), session);
+    return session.getSessionHandle();
+  }
+```
+回到之前调用的代码
+
+```
+public OperationHandle executeStatementAsync(SessionHandle sessionHandle, String statement,
+    Map<String, String> confOverlay) throws HiveSQLException {
+  OperationHandle opHandle = sessionManager.getSession(sessionHandle)
+      .executeStatementAsync(statement, confOverlay);
+  LOG.debug(sessionHandle + ": executeStatementAsync()");
+  return opHandle;
+}
+```
+这里就是HiveSessionImpl里的调用了
+
+```
+public OperationHandle executeStatementAsync(String statement, Map<String, String> confOverlay)
+    throws HiveSQLException {
+  return executeStatementInternal(statement, confOverlay, true);
+}
+  private OperationHandle executeStatementInternal(String statement, Map<String, String> confOverlay,
+      boolean runAsync)
+          throws HiveSQLException {
+    acquire(true);
+
+    OperationManager operationManager = getOperationManager();
+    ExecuteStatementOperation operation = operationManager
+        .newExecuteStatementOperation(getSession(), statement, confOverlay, runAsync);
+    OperationHandle opHandle = operation.getHandle();
+    try {
+      operation.run();
+      opHandleSet.add(opHandle);
+      return opHandle;
+    } catch (HiveSQLException e) {
+      // Refering to SQLOperation.java,there is no chance that a HiveSQLException throws and the asyn
+      // background operation submits to thread pool successfully at the same time. So, Cleanup
+      // opHandle directly when got HiveSQLException
+      operationManager.closeOperation(opHandle);
+      throw e;
+    } finally {
+      release(true);
+    }
+  }
+//Operation
+public void run() throws HiveSQLException {
+  beforeRun();
+  try {
+    runInternal();
+  } finally {
+    afterRun();
+  }
+}
+```
+
+这个Operation是啥呢，就是SparkExecuteStatementOperation,绕了一圈这里才是熟悉的sqlContext.sql()
+
+```
+override def runInternal(): Unit = {
+ //...
+  if (!runInBackground) {
+    execute()
+  } else {
+  //...
+ }
+ 
+  private def execute(): Unit = {
+  //...
+  result = sqlContext.sql(statement)
+  //...
   }
 ```
