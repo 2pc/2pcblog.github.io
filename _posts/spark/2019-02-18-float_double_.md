@@ -83,3 +83,152 @@ mysql> select num*10900 from tt;
 
 mysql> 
 ```
+默认方式
+```
+mysql> CREATE TABLE tt(f FLOAT DEFAULT NULL,d DOUBLE DEFAULT NULL,de DECIMAL DEFAULT NULL);
+Query OK, 0 rows affected (0.09 sec)
+mysql> desc tt;
++-------+---------------+------+-----+---------+-------+
+| Field | Type          | Null | Key | Default | Extra |
++-------+---------------+------+-----+---------+-------+
+| f     | float         | YES  |     | NULL    |       |
+| d     | double        | YES  |     | NULL    |       |
+| de    | decimal(10,0) | YES  |     | NULL    |       |
++-------+---------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+```
+插入数据
+
+```
+mysql> INSERT INTO tt(f,d,de) VALUES(1.234,1.234,1.234);
+Query OK, 1 row affected, 1 warning (0.06 sec)
+
+mysql> select * from tt;
++-------+-------+------+
+| f     | d     | de   |
++-------+-------+------+
+| 1.234 | 1.234 |    1 |
++-------+-------+------+
+1 row in set (0.00 sec)
+```
+
+这个是默认的精度方式插入的：float，double按照四舍五入，decimal默认是整形数据，没有保留小数点后的数据
+
+接着修改下精度和标度
+```
+mysql> ALTER TABLE tt MODIFY f FLOAT(8,2);
+Query OK, 0 rows affected (0.02 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE tt MODIFY d DOUBLE(8,2);
+Query OK, 0 rows affected (0.04 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE tt MODIFY de DECIMAL(8,2);
+Query OK, 1 row affected (0.05 sec)
+Records: 1  Duplicates: 0  Warnings: 0
+
+mysql> desc tt;
++-------+--------------+------+-----+---------+-------+
+| Field | Type         | Null | Key | Default | Extra |
++-------+--------------+------+-----+---------+-------+
+| f     | float(8,2)   | YES  |     | NULL    |       |
+| d     | double(8,2)  | YES  |     | NULL    |       |
+| de    | decimal(8,2) | YES  |     | NULL    |       |
++-------+--------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+mysql> select * from tt;
++------+------+------+
+| f    | d    | de   |
++------+------+------+
+| 1.23 | 1.23 | 1.00 |
++------+------+------+
+1 row in set (0.00 sec)
+
+mysql> SELECT SUM(f),SUM(d),SUM(de) FROM tt;
++--------+--------+---------+
+| SUM(f) | SUM(d) | SUM(de) |
++--------+--------+---------+
+|   1.23 |   1.23 |    1.00 |
++--------+--------+---------+
+1 row in set (0.00 sec)
+
+mysql> INSERT INTO tt(f,d,de) VALUES(0.001,0.001,0.001);
+Query OK, 1 row affected, 1 warning (0.24 sec)
+
+mysql> SELECT SUM(f),SUM(d),SUM(de) FROM tt;
++--------+--------+---------+
+| SUM(f) | SUM(d) | SUM(de) |
++--------+--------+---------+
+|   1.23 |   1.23 |    1.00 |
++--------+--------+---------+
+1 row in set (0.00 sec)
+
+mysql> INSERT INTO tt(f,d,de) VALUES(0.01,0.01,0.01);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> SELECT SUM(f),SUM(d),SUM(de) FROM tt;
++--------+--------+---------+
+| SUM(f) | SUM(d) | SUM(de) |
++--------+--------+---------+
+|   1.24 |   1.24 |    1.01 |
++--------+--------+---------+
+1 row in set (0.01 sec)
+
+mysql> select * from tt;
++------+------+------+
+| f    | d    | de   |
++------+------+------+
+| 1.23 | 1.23 | 1.00 |
+| 0.00 | 0.00 | 0.00 |
+| 0.01 | 0.01 | 0.01 |
++------+------+------+
+3 rows in set (0.00 sec)
+
+mysql> ALTER TABLE tt MODIFY f FLOAT;
+Query OK, 0 rows affected (0.08 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE tt MODIFY d DOUBLE;
+Query OK, 0 rows affected (0.04 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE tt MODIFY de DECIMAL;
+Query OK, 3 rows affected, 1 warning (0.06 sec)
+Records: 3  Duplicates: 0  Warnings: 1
+
+mysql> select * from tt;
++-------+-------+------+
+| f     | d     | de   |
++-------+-------+------+
+| 1.234 | 1.234 |    1 |
+|     0 |     0 |    0 |
+|  0.01 |  0.01 |    0 |
++-------+-------+------+
+3 rows in set (0.00 sec)
+
+mysql> INSERT INTO tt(f,d,de) VALUES(1.234,0.01,1.23);
+Query OK, 1 row affected, 1 warning (0.00 sec)
+
+mysql> select * from tt;
++-------+-------+------+
+| f     | d     | de   |
++-------+-------+------+
+| 1.234 | 1.234 |    1 |
+|     0 |     0 |    0 |
+|  0.01 |  0.01 |    0 |
+| 1.234 |  0.01 |    1 |
++-------+-------+------+
+4 rows in set (0.00 sec)
+
+mysql> SELECT SUM(f),SUM(d),SUM(de) FROM tt;
++-------------------+--------+---------+
+| SUM(f)            | SUM(d) | SUM(de) |
++-------------------+--------+---------+
+| 2.477999934926629 |  1.254 |       2 |
++-------------------+--------+---------+
+1 row in set (0.00 sec)
+
+mysql>
+```
