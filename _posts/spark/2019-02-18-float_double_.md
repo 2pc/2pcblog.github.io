@@ -145,7 +145,9 @@ mysql> select * from tt;
 | 1.23 | 1.23 | 1.00 |
 +------+------+------+
 1 row in set (0.00 sec)
-
+```
+sum求和有时也会有问题
+```
 mysql> SELECT SUM(f),SUM(d),SUM(de) FROM tt;
 +--------+--------+---------+
 | SUM(f) | SUM(d) | SUM(de) |
