@@ -105,6 +105,24 @@ cliService就是SparkSQLCLIService,thriftCLIService这里会有两种可选择,T
 
 这两个都是封装的thrift相关的，按理thrift server服务直接看processor就好了，
 
+```
+at org.apache.hive.service.cli.session.SessionManager.submitBackgroundOperation(SessionManager.java:354)
+at org.apache.spark.sql.hive.thriftserver.SparkExecuteStatementOperation.runInternal(SparkExecuteStatementOperation.scala:196)
+at org.apache.hive.service.cli.operation.Operation.run(Operation.java:257)
+at org.apache.hive.service.cli.session.HiveSessionImpl.executeStatementInternal(HiveSessionImpl.java:388)
+at org.apache.hive.service.cli.session.HiveSessionImpl.executeStatementAsync(HiveSessionImpl.java:375)
+at org.apache.hive.service.cli.CLIService.executeStatementAsync(CLIService.java:275)
+at org.apache.hive.service.cli.thrift.ThriftCLIService.ExecuteStatement(ThriftCLIService.java:436)
+at org.apache.hive.service.cli.thrift.TCLIService$Processor$ExecuteStatement.getResult(TCLIService.java:1313)
+at org.apache.hive.service.cli.thrift.TCLIService$Processor$ExecuteStatement.getResult(TCLIService.java:1298)
+at org.apache.thrift.ProcessFunction.process(ProcessFunction.java:39)
+at org.apache.thrift.TBaseProcessor.process(TBaseProcessor.java:39)
+at org.apache.hive.service.auth.TSetIpAddressProcessor.process(TSetIpAddressProcessor.java:53)
+at org.apache.thrift.server.TThreadPoolServer$WorkerProcess.run(TThreadPoolServer.java:286)
+at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+```
+
 先看ThriftHttpCLIService，在其run函数里边启动jettyserver,processor是TCLIService.Processor
 
 ```
