@@ -18,13 +18,13 @@ writeStream
 
 ```
   .writeStream
-  .outputMode(OutputMode.Append())
+  .outputMode(OutputMode.Append())//append only
  // .format("es") classNotFound es.DefaultSource
   .format("org.elasticsearch.spark.sql")
   .option("es.nodes", "localhost")
   .option("es.port", "9200")
   .option("checkpointLocation", "/tmp/checkpointLocation")
- // .option("es.mapping.id", "id")//没有mapping.id呢
+ // .option("es.mapping.id", "id")//if no mapping.id ?
   .trigger(Trigger.ProcessingTime(10, TimeUnit.SECONDS))
   .start("a/profile")
   .awaitTermination()
