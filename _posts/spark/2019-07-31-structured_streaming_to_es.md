@@ -6,7 +6,7 @@ layout: post
 tags : [Spark]
 ---
 
-依赖
+Maven依赖
 ```
 <dependency>
     <groupId>org.elasticsearch</groupId>
