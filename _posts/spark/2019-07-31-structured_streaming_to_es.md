@@ -1,3 +1,10 @@
+---
+title: Structured Streaming with ElasticSearch
+tagline: "spark"
+category : spark
+layout: post
+tags : [Spark]
+---
 
 依赖
 ```
@@ -12,7 +19,7 @@ writeStream
 ```
   .writeStream
   .outputMode(OutputMode.Append())
- // .format("es")
+ // .format("es") classNotFound es.DefaultSource
   .format("org.elasticsearch.spark.sql")
   .option("es.nodes", "localhost")
   .option("es.port", "9200")
