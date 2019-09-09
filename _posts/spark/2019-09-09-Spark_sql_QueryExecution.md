@@ -1,4 +1,10 @@
-
+---
+title: Spark SQL QueryExecution
+tagline: "spark"
+category : spark
+layout: post
+tags : [Spark Sql]
+---
 
 ```
   override def addBatch(batchId: Long, data: DataFrame): Unit = {
