@@ -62,3 +62,69 @@ analyzed: LogicalPlan
 ```
 sc.runjob()
 ```
+eg:
+collect()
+```
+def executeCollect(): Array[InternalRow] = {
+  val byteArrayRdd = getByteArrayRdd()
+
+  val results = ArrayBuffer[InternalRow]()
+  byteArrayRdd.collect().foreach { countAndBytes =>
+    decodeUnsafeRows(countAndBytes._2).foreach(results.+=)
+  }
+  results.toArray
+}
+//RDD.scala
+  def collect(): Array[T] = withScope {
+  val results = sc.runJob(this, (iter: Iterator[T]) => iter.toArray)
+  Array.concat(results: _*)
+}
+```
+take
+```
+def executeTake(n: Int): Array[InternalRow] = {
+if (n == 0) {
+  return new Array[InternalRow](0)
+}
+
+val childRDD = getByteArrayRdd(n).map(_._2)
+
+val buf = new ArrayBuffer[InternalRow]
+val totalParts = childRDD.partitions.length
+var partsScanned = 0
+while (buf.size < n && partsScanned < totalParts) {
+  // The number of partitions to try in this iteration. It is ok for this number to be
+  // greater than totalParts because we actually cap it at totalParts in runJob.
+  var numPartsToTry = 1L
+  if (partsScanned > 0) {
+    // If we didn't find any rows after the previous iteration, quadruple and retry.
+    // Otherwise, interpolate the number of partitions we need to try, but overestimate
+    // it by 50%. We also cap the estimation in the end.
+    val limitScaleUpFactor = Math.max(sqlContext.conf.limitScaleUpFactor, 2)
+    if (buf.isEmpty) {
+      numPartsToTry = partsScanned * limitScaleUpFactor
+    } else {
+      val left = n - buf.size
+      // As left > 0, numPartsToTry is always >= 1
+      numPartsToTry = Math.ceil(1.5 * left * partsScanned / buf.size).toInt
+      numPartsToTry = Math.min(numPartsToTry, partsScanned * limitScaleUpFactor)
+    }
+  }
+
+  val p = partsScanned.until(math.min(partsScanned + numPartsToTry, totalParts).toInt)
+  val sc = sqlContext.sparkContext
+  val res = sc.runJob(childRDD,
+    (it: Iterator[Array[Byte]]) => if (it.hasNext) it.next() else Array.empty[Byte], p)
+
+  buf ++= res.flatMap(decodeUnsafeRows)
+
+  partsScanned += p.size
+}
+
+if (buf.size > n) {
+  buf.take(n).toArray
+} else {
+  buf.toArray
+}
+  }
+```
