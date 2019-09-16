@@ -23,7 +23,7 @@ tags : [Spark Sql]
     batchWriter(ds, batchId)
   }
 ```
-toRdd
+从toRdd往前推
 ```
   /** Internal version of the RDD. Avoids copies and has no schema */
   lazy val toRdd: RDD[InternalRow] = executedPlan.execute()
