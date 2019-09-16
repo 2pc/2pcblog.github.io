@@ -6,11 +6,11 @@ layout: post
 tags : [Spark Sql]
 ---
 
-1.sql 通过SqlParser 解析成 Unresolved Logical Plan;
-2.analyzer 结合catalog 进行绑定,生成 Logical Plan;
-3.optimizer 对 Logical Plan 优化,生成 Optimized LogicalPlan;
-4.SparkPlan 将 Optimized LogicalPlan 转换成 Physical Plan;
-5.prepareForExecution()将 Physical Plan 转换成 executed Physical Plan;
+1.sql 通过SqlParser 解析成 Unresolved Logical Plan;   
+2.analyzer 结合catalog 进行绑定,生成 Logical Plan;   
+3.optimizer 对 Logical Plan 优化,生成 Optimized LogicalPlan;   
+4.SparkPlan 将 Optimized LogicalPlan 转换成 Physical Plan;   
+5.prepareForExecution()将 Physical Plan 转换成 executed Physical Plan;   
 6.execute()执行可执行物理计划，得到RDD;
 
 ```
