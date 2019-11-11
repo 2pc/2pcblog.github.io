@@ -8,7 +8,8 @@ tags : [flink, streamsets, realtime]
 
 StreamExecWindowJoin
 
-
+RowTimeBoundedStreamJoin
+ProcTimeBoundedStreamJoin
 ```
 /**
  * A CoProcessFunction to execute time-bounded stream inner-join.
