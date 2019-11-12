@@ -6,7 +6,7 @@ layout: post
 tags : [flink, streamsets, realtime]
 ---
 
-StreamExecWindowJoin
+blink: StreamExecWindowJoin,StreamExecJoin
 
 RowTimeBoundedStreamJoin   
 ProcTimeBoundedStreamJoin
