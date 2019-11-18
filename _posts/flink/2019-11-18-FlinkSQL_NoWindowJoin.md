@@ -113,4 +113,4 @@ Stage 2 : Data Source
 
 ```
 这里debug可以看下Optimized Logical Plan   
-![translateToPlan](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/no_window_join.png)
+![No_Window_Join](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/no_window_join.png)
