@@ -112,5 +112,5 @@ Stage 2 : Data Source
 						ship_strategy : FORWARD
 
 ```
-这里debug可以看下Optimized Logical Plan
+这里debug可以看下Optimized Logical Plan   
 ![translateToPlan](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/no_window_join.png)
