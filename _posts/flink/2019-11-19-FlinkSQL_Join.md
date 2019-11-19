@@ -39,7 +39,7 @@ WHERE o.id = s.orderId AND
 [Flink Sql Join](https://ci.apache.org/projects/flink/flink-docs-master/dev/table/sql.html)
 
 ## Window Join&Interval Join
-
+Flink执行计划都是DataStreamWindowJoin？
 ### Window Join
 
 ```
