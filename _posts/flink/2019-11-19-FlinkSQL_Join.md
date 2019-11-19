@@ -25,9 +25,9 @@ FROM Orders FULL OUTER JOIN Product ON Orders.productId = Product.id
 
 A time-windowed join requires at least one equi-join predicate and a join condition that bounds the time on both sides
 
-. ltime = rtime
-. ltime >= rtime AND ltime < rtime + INTERVAL '10' MINUTE
-. ltime BETWEEN rtime - INTERVAL '10' SECOND AND rtime + INTERVAL '5' SECOND
+. ltime = rtime   
+. ltime >= rtime AND ltime < rtime + INTERVAL '10' MINUTE   
+. ltime BETWEEN rtime - INTERVAL '10' SECOND AND rtime + INTERVAL '5' SECOND   
 
 ```
 SELECT *
@@ -53,7 +53,7 @@ orangeStream.join(greenStream)
 ```
 
 ### Interval Join   
-. b.timestamp ∈ [a.timestamp + lowerBound; a.timestamp + upperBound] 
+. b.timestamp ∈ [a.timestamp + lowerBound; a.timestamp + upperBound]   
 . or a.timestamp + lowerBound <= b.timestamp <= a.timestamp + upperBound
 
 ```
