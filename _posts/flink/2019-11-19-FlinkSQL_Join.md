@@ -51,6 +51,15 @@ orangeStream.join(greenStream)
     .window(TumblingEventTimeWindows.of(Time.milliseconds(2)))
     .apply { (e1, e2) => e1 + "," + e2 }
 ```
+window join sql?
+```
+SELECT t2.key,TUMBLE_START(t2.rt, INTERVAL '4' SECOND),TUMBLE_END(t2.rt, INTERVAL '4' SECOND), COUNT(t1.key)
+FROM T1 AS t1 join T2 AS t2 ON
+  t1.key = t2.key AND
+  t1.rt BETWEEN t2.rt - INTERVAL '3' SECOND AND
+    t2.rt + INTERVAL '3' SECOND
+GROUP BY TUMBLE(t2.rt, INTERVAL '4' SECOND),t2.key
+```
 
 ### Interval Join   
 . b.timestamp ∈ [a.timestamp + lowerBound; a.timestamp + upperBound]   
