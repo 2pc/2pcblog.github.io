@@ -1,5 +1,5 @@
 ---
-title: Flink join
+title: Flink Join说明
 tagline: ""
 category : flink
 layout: post
@@ -7,7 +7,8 @@ tags : [flink, streamsets, realtime]
 ---
 
 ## Unbounded JOIN
-### Regular join/Equi-join
+### Regula/Equi-join
+Regularjoin,没有time相关条件？
 ```
 SELECT *
 FROM Orders INNER JOIN Product ON Orders.productId = Product.id
@@ -22,7 +23,7 @@ FROM Orders FULL OUTER JOIN Product ON Orders.productId = Product.id
 ```
 ## bounded JOIN
 ### Time-windowed Join  
-
+也算是Regular join的子集
 A time-windowed join requires at least one equi-join predicate and a join condition that bounds the time on both sides
 
 . ltime = rtime   
