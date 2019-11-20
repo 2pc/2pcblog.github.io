@@ -1,5 +1,5 @@
 ---
-title: Flink join原理
+title: Flink Time Window Join原理
 tagline: ""
 category : flink
 layout: post
@@ -21,7 +21,9 @@ FlinkRuleSets
 ```
 blink: StreamExecWindowJoin,StreamExecJoin
 
+
 RowTimeBoundedStreamJoin   
+继承自TimeBoundedStreamJoin，这个TimeBoundedStreamJoin(在早期名称TimeBoundedStreamInnerJoin,仅限innerjoin?)
 ProcTimeBoundedStreamJoin
 ```
 /**
