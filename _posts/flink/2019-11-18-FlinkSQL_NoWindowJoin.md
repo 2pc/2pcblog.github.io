@@ -114,3 +114,49 @@ Stage 2 : Data Source
 ```
 这里debug可以看下Optimized Logical Plan   
 ![No_Window_Join](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/no_window_join.png)
+
+在经过sql解析生成AST以及各种逻辑/物理计划优化后最后调用toDataStream
+
+这里会包装一串transformations，于StreamGraph生成有关
+
+```
+  private def toDataStream[T](
+      table: Table,
+      modifyOperation: OutputConversionModifyOperation)
+    : DataStream[T] = {
+    val transformations = planner
+      .translate(Collections.singletonList(modifyOperation))
+    val streamTransformation: Transformation[T] = getTransformation(
+      table,
+      transformations)
+    scalaExecutionEnvironment.getWrappedStreamExecutionEnvironment.addOperator(streamTransformation)
+    new DataStream[T](new JDataStream[T](
+      scalaExecutionEnvironment
+        .getWrappedStreamExecutionEnvironment, streamTransformation))
+  }
+```
+这个addOperator添加到transformations
+```
+public void addOperator(Transformation<?> transformation) {
+    Preconditions.checkNotNull(transformation, "transformation must not be null.");
+    this.transformations.add(transformation);
+}
+```
+transformations在后续会用来生成StreamGraph
+
+```
+   public StreamGraph getStreamGraph(String jobName) {
+        return this.getStreamGraphGenerator().setJobName(jobName).generate();
+    }
+
+    private StreamGraphGenerator getStreamGraphGenerator() {
+        if (this.transformations.size() <= 0) {
+            throw new IllegalStateException("No operators defined in streaming topology. Cannot execute.");
+        } else {
+            return (new StreamGraphGenerator(this.transformations, this.config, this.checkpointCfg)).setStateBackend(this.defaultStateBackend).setChaining(this.isChainingEnabled).setUserArtifacts(this.cacheFile).setTimeCharacteristic(this.timeCharacteristic).setDefaultBufferTimeout(this.bufferTimeout);
+        }
+    }
+```
+这里展示了示例sql的transformations：   
+![transformation1](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/transformation2.png)   
+![transformation2](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/transformation1.png)
