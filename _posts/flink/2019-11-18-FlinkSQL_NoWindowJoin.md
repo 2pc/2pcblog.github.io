@@ -158,5 +158,5 @@ transformations在后续会用来生成StreamGraph
     }
 ```
 这里展示了示例sql的transformations：   
-[transformation1](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/transformation2.png)   
-[transformation2](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/transformation1.png)
+![transformation1](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/transformation2.png)   
+![transformation2](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/transformation1.png)
