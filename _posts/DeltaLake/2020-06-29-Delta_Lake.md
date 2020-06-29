@@ -1,5 +1,5 @@
 ---
-title: Delta Lake 实现分析
+title: Delta 实现分析
 tagline: "delta lake"
 category : delta lake
 layout: post
