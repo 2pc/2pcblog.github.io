@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "基于MQ消息实现分布式事务"
+title: "分布式事务消息最终一致性解决方案"
 keywords: ["distributed"]
 description: "数据库事务隔离一致性"
 category: "distributed"
