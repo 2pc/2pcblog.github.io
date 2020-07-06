@@ -7,8 +7,12 @@ tags : [delta lake]
 ---
 delta lake 
 
-### DeltaTableOperations
+## API DeltaTable
+
+### DeltaTable(DeltaTableOperations)
 
 #### executeDelete
 
 #### executeUpdate
+
+## SQL DeltaSparkSessionExtension
