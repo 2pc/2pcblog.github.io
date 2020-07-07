@@ -16,3 +16,21 @@ delta lake
 #### executeUpdate
 
 ## SQL DeltaSparkSessionExtension
+
+### DeltaDataSource
+
+```
+class DeltaDataSource
+  extends RelationProvider
+  with StreamSourceProvider
+  with StreamSinkProvider
+  with CreatableRelationProvider
+  with DataSourceRegister
+  with TableProvider
+  with DeltaLogging {
+```
+
+1. RelationProvider 批量读取
+2. CreatableRelationProvider 批量写入
+3. StreamSourceProvider stream source 
+4. StreamSinkProvider stream sink 
