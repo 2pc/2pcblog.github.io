@@ -10,4 +10,8 @@ tags : [delta lake]
 
 ### Hudi
 
+操作上 update类似insert
+
+支持copy on Write&Read on Merge
+
 ### Iceberg
