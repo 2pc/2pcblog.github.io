@@ -5,6 +5,8 @@ category : kafka
 layout: post
 tags : [kafka]
 ---
+[KIP-98 - Exactly Once Delivery and Transactional Messaging](https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging)
+![Transactional Messaging](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/kafka_tx.jpg)
 
 事务消息示例：
 ```
