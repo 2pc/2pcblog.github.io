@@ -33,6 +33,29 @@ producer.sendOffsetsToTransaction(offsets, consumer.groupMetadata());
 producer.commitTransaction();
 ```
 
+### 1. Finding a transaction coordinator -- the FindCoordinatorRequest
+
+### 2. Getting a producer Id -- the InitPidRequest
+
+### 3.  Starting a Transaction – The beginTransaction() API
+### 4. The consume-transform-produce loop
+
+#### 4.1 AddPartitionsToTxnRequest
+
+#### 4.2 ProduceRequest
+
+#### 4.3 AddOffsetCommitsToTxnRequest
+
+#### 4.4 TxnOffsetCommitRequest
+
+### 5  Committing or Aborting a Transaction
+
+#### 5.1 EndTxnRequest
+
+#### 5.2 WriteTxnMarkerRequest
+
+#### 5.3 Writing the final Commit or Abort Message
+
 initTransactions 依据transactionId 获取PID与epoch
 
 ```
