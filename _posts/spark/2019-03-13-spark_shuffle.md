@@ -13,7 +13,7 @@ tags : [Spark thrift]
 ### Hash Shuffle V2
 M(Executor)*R
 
-500个map  task 分配10个Executor,每个Executor分配50个task, 则总文件数10*R
+500个map  task 分配10个Executor,每个Executor一个core,每个Executor分配50个task, 则总文件数10*R
 
 ### Sort Shuffle V1
 
