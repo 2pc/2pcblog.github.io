@@ -129,7 +129,7 @@ xxx.cf
 
 #### nginx 配置以及证书变更
 
-生成证书
+生成证书,注意先关闭端口 比如80或者443冲突
 ```
  certbot certonly --standalone -d xxx.cf  -m abc@gmail.com
 ```
