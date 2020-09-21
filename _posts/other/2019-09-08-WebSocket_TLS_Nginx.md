@@ -117,3 +117,31 @@ systemctl start nginx
 systemctl status nginx
 ```
 客户端配置
+
+### 域名到期了
+freenom.com不支持xx宝，算了 继续白嫖吧
+重新申请域名
+xxx.cf
+
+#### freenom.com与cf域名解析变更
+所以也需要重新去cf配置cdn解析
+首先配置cf上的cdn解析，解析完之后再上freenom.com修改dns解析为cf的
+
+#### nginx 配置以及证书变更
+
+生成证书
+```
+ certbot certonly --standalone -d xxx.cf  -m abc@gmail.com
+```
+
+修改nginx配置
+```
+    server_name  d11i.cf;
+    ssl_certificate    /etc/letsencrypt/live/xxx.cf/fullchain.pem;
+    ssl_certificate_key    /etc/letsencrypt/live/xxx.cf/privkey.pem;
+```
+
+
+
+
+
