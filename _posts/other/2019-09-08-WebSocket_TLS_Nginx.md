@@ -136,7 +136,7 @@ xxx.cf
 
 修改nginx配置
 ```
-    server_name  d11i.cf;
+    server_name  xxx.cf;
     ssl_certificate    /etc/letsencrypt/live/xxx.cf/fullchain.pem;
     ssl_certificate_key    /etc/letsencrypt/live/xxx.cf/privkey.pem;
 ```
