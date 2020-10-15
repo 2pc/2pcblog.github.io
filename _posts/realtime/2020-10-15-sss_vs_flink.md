@@ -22,7 +22,7 @@ since Spark 2.3, we have introduced a new low-latency processing mode called Con
 as low as 1 millisecond with at-least-once guarantees. Without changing the Dataset/DataFrame operations in your queries, you will be able to   
 choose the mode based on your application requirements   
 4. 另外： 对的支持也是相当有限的，即使在2.4版本   
-![Supported Queries](https://github.com/2pc/2pc.github.io/blob/master/images/2.4.png)   
+![Supported Queries](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/2.4.png)   
 
 
 ### 批处理
@@ -30,4 +30,4 @@ choose the mode based on your application requirements
 #### spark 
 
 1. spark目前在离线批处理方面应该比flink应用的更加广泛了，即便是用的hive引擎页大多是spark   
-2. flink最近已经整合了hive,当然也在整合delta lake, hudi等的，具备批处理的能力
+2. flink已经整合了hive,当然也在整合delta lake, hudi， iceberg等的，具备流批处理的能力
