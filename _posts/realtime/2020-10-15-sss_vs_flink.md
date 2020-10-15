@@ -12,16 +12,19 @@ tags : [Java, spark, flink]
 
 1. spark 这里这关注structured streaming,因为streaming没有实战过，sss通常还是micro batch， 默认100 milliseconds，    
 但是在since Spark 2.3引入新的Continuous Processing，这个老实说感觉挺鸡勒的
-2. 
 
-贴下官方的描述[Continuous Processing ](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#continuous-processing)   
+2. sss在多流join方面也是有些限制的
+
+3. 贴下官方的描述[Continuous Processing ](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#continuous-processing)   
 Internally, by default, Structured Streaming queries are processed using a micro-batch processing engine, which processes data streams as a  
 series of small batch jobs thereby achieving end-to-end latencies as low as 100 milliseconds and exactly-once fault-tolerance guarantees. However,   
 since Spark 2.3, we have introduced a new low-latency processing mode called Continuous Processing, which can achieve end-to-end latencies   
 as low as 1 millisecond with at-least-once guarantees. Without changing the Dataset/DataFrame operations in your queries, you will be able to   
 choose the mode based on your application requirements   
-另外： 对的支持也是相当有限的，即使在2.4版本
-[]()
+4. 另外： 对的支持也是相当有限的，即使在2.4版本   
+![Supported Queries](https://raw.githubusercontent.com/2pc/2pc.github.io/master/images/2.4.jpg)   
+
+
 ### 批处理
 
 #### spark 
