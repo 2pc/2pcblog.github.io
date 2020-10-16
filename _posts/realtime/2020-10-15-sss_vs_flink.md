@@ -10,7 +10,7 @@ tags : [Java, spark, flink]
 
 ### 实时处理方面
 
-1. spark 这里这关注structured streaming,因为streaming没有实战过，sss通常还是micro batch， 默认100 milliseconds，    
+1. spark 这里只关注structured streaming,因为工作中以sss为主，sss通常还是micro batch， 默认100 milliseconds，    
 但是在since Spark 2.3引入新的Continuous Processing，这个老实说感觉挺鸡勒的
 
 2. sss在多流join方面也是有些限制的,[Support matrix for joins in streaming queries](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#support-matrix-for-joins-in-streaming-queries)
