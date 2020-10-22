@@ -119,6 +119,44 @@ public CompletableFuture<CompletedCheckpoint> triggerCheckpoint(
 }
 ```
 
+```
+//CheckpointCoordinator
+final long checkpointId = checkpoint.getCheckpointId();
+snapshotTaskState(
+	timestamp,
+	checkpointId,
+	checkpoint.getCheckpointStorageLocation(),
+	request.props,
+	executions,
+	request.advanceToEndOfTime);
+//CheckpointCoordinator
+private void snapshotTaskState(
+	long timestamp,
+	long checkpointID,
+	CheckpointStorageLocation checkpointStorageLocation,
+	CheckpointProperties props,
+	Execution[] executions,
+	boolean advanceToEndOfTime) {
+
+	final CheckpointOptions checkpointOptions = new CheckpointOptions(
+		props.getCheckpointType(),
+		checkpointStorageLocation.getLocationReference(),
+		isExactlyOnceMode,
+		props.getCheckpointType() == CheckpointType.CHECKPOINT && unalignedCheckpointsEnabled);
+
+	// send the messages to the tasks that trigger their checkpoint
+	for (Execution execution: executions) {
+		if (props.isSynchronous()) {
+			execution.triggerSynchronousSavepoint(checkpointID, timestamp, checkpointOptions, advanceToEndOfTime);
+		} else {
+			execution.triggerCheckpoint(checkpointID, timestamp, checkpointOptions);
+		}
+	}
+}
+```
+Execution.triggerCheckpoint-->Execution.triggerCheckpointHelper-->taskManagerGateway.triggerCheckpoint-->TaskManagerGateway.triggerCheckpoint-->taskExecutorGateway.triggerCheckpoint()
+
+这里taskExecutorGateway的实现类有TaskExecutor
 
 //TaskExecutor triggerCheckpointBarrier
 
