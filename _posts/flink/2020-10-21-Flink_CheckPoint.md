@@ -156,7 +156,7 @@ private void snapshotTaskState(
 ```
 Execution.triggerCheckpoint-->Execution.triggerCheckpointHelper-->taskManagerGateway.triggerCheckpoint-->TaskManagerGateway.triggerCheckpoint-->taskExecutorGateway.triggerCheckpoint()
 
-这里taskExecutorGateway的实现类有TaskExecutor
+这里taskExecutorGateway的实现类有TaskExecutor，在TaskExecutor的triggerCheckpoint方法里看到了triggerCheckpointBarrier
 
 //TaskExecutor triggerCheckpointBarrier
 
@@ -187,5 +187,82 @@ public CompletableFuture<Acknowledge> triggerCheckpoint(
     return FutureUtils.completedExceptionally(new CheckpointException(message, CheckpointFailureReason.TASK_CHECKPOINT_FAILURE));
   }
 }
+//
+if (executionState == ExecutionState.RUNNING && invokable != null) {
+	try {
+		invokable.triggerCheckpointAsync(checkpointMetaData, checkpointOptions, advanceToEndOfEventTime);
+	}
+	catch (RejectedExecutionException ex) {}
+}
+```
+这里的invokable可以是StreamTask，SourceStreamTask，这两其实最终调用的是一个，因为子类调用super.triggerCheckpointAsync
 
 ```
+//SourceStreamTask.triggerCheckpointAsync-->StreamTask.triggerCheckpointAsyn-->StreamTask.triggerCheckpoint-->StreamTask.performCheckpoint--》subtaskCheckpointCoordinator.checkpointState
+
+```
+最新版的都抽到SubtaskCheckpointCoordinator里了？
+
+```
+public void checkpointState(
+		CheckpointMetaData metadata,
+		CheckpointOptions options,
+		CheckpointMetrics metrics,
+		OperatorChain<?, ?> operatorChain,
+		Supplier<Boolean> isCanceled) throws Exception {
+
+	checkNotNull(options);
+	checkNotNull(metrics);
+
+	// All of the following steps happen as an atomic step from the perspective of barriers and
+	// records/watermarks/timers/callbacks.
+	// We generally try to emit the checkpoint barrier as soon as possible to not affect downstream
+	// checkpoint alignments
+
+	if (lastCheckpointId >= metadata.getCheckpointId()) {
+		LOG.info("Out of order checkpoint barrier (aborted previously?): {} >= {}", lastCheckpointId, metadata.getCheckpointId());
+		channelStateWriter.abort(metadata.getCheckpointId(), new CancellationException(), true);
+		checkAndClearAbortedStatus(metadata.getCheckpointId());
+		return;
+	}
+
+	// Step (0): Record the last triggered checkpointId and abort the sync phase of checkpoint if necessary.
+	lastCheckpointId = metadata.getCheckpointId();
+	if (checkAndClearAbortedStatus(metadata.getCheckpointId())) {
+		// broadcast cancel checkpoint marker to avoid downstream back-pressure due to checkpoint barrier align.
+		operatorChain.broadcastEvent(new CancelCheckpointMarker(metadata.getCheckpointId()));
+		LOG.info("Checkpoint {} has been notified as aborted, would not trigger any checkpoint.", metadata.getCheckpointId());
+		return;
+	}
+
+	// Step (1): Prepare the checkpoint, allow operators to do some pre-barrier work.
+	//           The pre-barrier work should be nothing or minimal in the common case.
+	operatorChain.prepareSnapshotPreBarrier(metadata.getCheckpointId());
+
+	// Step (2): Send the checkpoint barrier downstream
+	operatorChain.broadcastEvent(
+		new CheckpointBarrier(metadata.getCheckpointId(), metadata.getTimestamp(), options),
+		options.isUnalignedCheckpoint());
+
+	// Step (3): Prepare to spill the in-flight buffers for input and output
+	if (options.isUnalignedCheckpoint()) {
+		prepareInflightDataSnapshot(metadata.getCheckpointId());
+	}
+
+	// Step (4): Take the state snapshot. This should be largely asynchronous, to not impact progress of the
+	// streaming topology
+
+	Map<OperatorID, OperatorSnapshotFutures> snapshotFutures = new HashMap<>(operatorChain.getNumberOfOperators());
+	try {
+		if (takeSnapshotSync(snapshotFutures, metadata, metrics, options, operatorChain, isCanceled)) {
+			finishAndReportAsync(snapshotFutures, metadata, metrics, options);
+		} else {
+			cleanup(snapshotFutures, metadata, metrics, new Exception("Checkpoint declined"));
+		}
+	} catch (Exception ex) {
+		cleanup(snapshotFutures, metadata, metrics, ex);
+		throw ex;
+	}
+}
+```
+
