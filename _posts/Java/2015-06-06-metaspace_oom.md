@@ -69,13 +69,60 @@ tags : [Java, File, tools，OOM]
 
 这里看出来其实是有fullgc的，还很频繁，因为dump依旧是那个50多M的文件，oom发生的位置也的都是Prometheus监控SimpleDateFormat.format时间，这个按里确实不太对
 
-于是又去CR代码，这次有点收获，发现有个老项目迁移过来的代码原本是要用单例的，可能是当时迁移赶时间，没有用单例，但是用的static修饰了该方法，这个是可能导致增加对象
-但是dump文件没有体现，不合理先按代码review规范改一版上线吧，于是把static方法改成了单例
+于是又去CR代码，这次有点收获，发现有个老项目迁移过来的代码原本是要用单例的，可能是当时迁移赶时间，没有用单例，但是用的static修饰了该方法，不合理先按代码review规范改一版上线吧，于是把static方法改成了DCL单例即时上线了，神奇的是上线完之后立马就好了，fullgc没了。没有使用单例可能导致对象增多理论上也不一定就会oom，但是dump文件没有体现
 
+### 其他jvm监控现象
 #### 类加载指标
 ![类加载](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/12.png)
 #### 其他正常程序类加载指标
 ![其他正常程序类加载](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/13.png)
+又仔细看了DCL内的代码逻辑，有用到aviator规则表达式,跟了下它的实现
+```
+AviatorEvaluator.compile(script);
+public static Expression compile(String expression) {
+    return compile(expression, false);
+}
+public static Expression compile(String expression, boolean cached) {
+    return getInstance().compile(expression, cached);
+}
+public Expression compile(String expression, boolean cached) {
+    return this.compile(expression, expression, cached);
+}
+public Expression compile(String cacheKey, String expression, boolean cached) {
+    if (expression != null && expression.trim().length() != 0) {
+        if (cacheKey != null && cacheKey.trim().length() != 0) {
+            if (!cached) {
+                return this.innerCompile(expression, cached);
+            } else {
+            //省略部分代码
+            }
+       }
+    }
+}
+private Expression innerCompile(String expression, boolean cached) {
+    ExpressionLexer lexer = new ExpressionLexer(this, expression);
+    CodeGenerator codeGenerator = this.newCodeGenerator(cached);
+    ExpressionParser parser = new ExpressionParser(this, lexer, codeGenerator);
+    Expression exp = parser.parse();
+    if (this.getOptionValue(Options.TRACE_EVAL).bool) {
+        ((BaseExpression)exp).setExpression(expression);
+    }
+
+    return exp;
+}
+```
+重点是这个newCodeGenerator
+```
+public CodeGenerator newCodeGenerator(boolean cached) {
+    AviatorClassLoader classLoader = this.getAviatorClassLoader(cached);
+    return this.newCodeGenerator(classLoader);
+}
+```
+这里默认cached是false，也就是每次调用这个规则表达式的时候都会去重新classloader一遍
+
+看到这里大概能跟前面类加载指标对的上了，为什么类加载指标正常程序是15000左右，这个大概能到40000
+
+
 
 
 
