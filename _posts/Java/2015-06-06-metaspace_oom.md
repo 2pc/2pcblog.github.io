@@ -120,7 +120,23 @@ public CodeGenerator newCodeGenerator(boolean cached) {
 ```
 这里默认cached是false，也就是每次调用这个规则表达式的时候都会去重新classloader一遍
 
-看到这里大概能跟前面类加载指标对的上了，为什么类加载指标正常程序是15000左右，这个大概能到40000
+看到这里大概能跟前面类加载指标对的上了，为什么类加载指标正常程序是15000左右，这个大概能到4,50000
+
+这里差不多了
+
+### 修复后效果
+#### 看下FullGC明显没了
+![gc日志监控](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/2.png)
+#### 类加载指标
+![类加载](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/3.png)
+
+其实还忽略了个问题,那就是console.log,搜了下确实有oom的，不过是java.lang.OutOfMemoryError: Metaspace
+看到没是metaspace, 这就对上了，看下修复前后对比把
+
+![gc日志监控](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/1.png)
+
+
+
 
 
 
