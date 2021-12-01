@@ -65,5 +65,5 @@ tags : [Java, File, tools，OOM]
 没招只好找自己程序的代码的BUG,CR了几次都没有发现问题，没办法oom了只好看gc日志了，发现fullgc一直在进行，占用的时间也不少
 
 
-![gc](https://github.com/2pc/2pc.github.io/tree/master/_posts/images/11.png)
+![gc](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/1.png)
 
