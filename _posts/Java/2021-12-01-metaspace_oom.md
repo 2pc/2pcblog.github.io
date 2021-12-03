@@ -65,7 +65,7 @@ tags : [Java, File, tools，OOM]
 没招只好找自己程序的代码的BUG,CR了几次都没有发现问题，没办法oom了只好看gc日志了，发现fullgc一直在进行，占用的时间也不少
 
 #### 看下gc日志
-![gc日志监控](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/11.png)
+![gc日志监控](https://raw.githubusercontent.com/2pc/2pc.github.io/master/_posts/images/11.png)
 
 这里看出来其实是有fullgc的，还很频繁，因为dump依旧是那个50多M的文件，oom发生的位置也的都是Prometheus监控SimpleDateFormat.format时间，这个按里确实不太对
 
@@ -73,9 +73,9 @@ tags : [Java, File, tools，OOM]
 
 ### 其他jvm监控现象
 #### 类加载指标
-![类加载](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/12.png)
+![类加载](https://raw.githubusercontent.com/2pc/2pc.github.io/master/_posts/images/12.png)
 #### 其他正常程序类加载指标
-![其他正常程序类加载](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/13.png)
+![其他正常程序类加载](https://raw.githubusercontent.com/2pc/2pc.github.io/master_posts/images/13.png)
 又仔细看了DCL内的代码逻辑，有用到aviator规则表达式,跟了下它的实现
 ```
 AviatorEvaluator.compile(script);
@@ -126,14 +126,14 @@ public CodeGenerator newCodeGenerator(boolean cached) {
 
 ### 修复后效果
 #### 看下FullGC明显没了
-![gc日志监控](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/2.png)
+![gc日志监控](https://raw.githubusercontent.com/2pc/2pc.github.io/master_posts/images/2.png)
 #### 类加载指标
-![类加载](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/3.png)
+![类加载](https://raw.githubusercontent.com/2pc/2pc.github.io/master_posts/images/3.png)
 
 其实还忽略了个问题,那就是console.log,搜了下确实有oom的，不过是java.lang.OutOfMemoryError: Metaspace
 看到没是metaspace, 这就对上了，看下修复前后对比把
 
-![gc日志监控](https://github.com/2pc/2pc.github.io/blob/master/_posts/images/1.png)
+![gc日志监控](https://raw.githubusercontent.com/2pc/2pc.github.io/master_posts/images/1.png)
 
 
 
