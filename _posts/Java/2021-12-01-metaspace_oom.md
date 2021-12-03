@@ -119,6 +119,11 @@ public CodeGenerator newCodeGenerator(boolean cached) {
 }
 ```
 这里默认cached是false，也就是每次调用这个规则表达式的时候都会去重新classloader一遍
+```
+public AviatorClassLoader getAviatorClassLoader(boolean cached) {
+    return cached ? this.aviatorClassLoader : new AviatorClassLoader(Thread.currentThread().getContextClassLoader());
+}
+```
 
 看到这里大概能跟前面类加载指标对的上了，为什么类加载指标正常程序是15000左右，这个大概能到4,50000
 
