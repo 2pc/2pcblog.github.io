@@ -24,8 +24,9 @@ tags : [rocketmq]
 ### 最大消费次数
 
 ####  首先看下普通消息与顺序消息有何不同
-consumer初始化流程
 ```
+consumer.start()-->this.defaultMQPushConsumerImpl.start()
+
 ```
 不同的消费这对应不同的Service: ConsumeMessageOrderlyService和ConsumeMessageConcurrentlyService
 ```
@@ -39,8 +40,7 @@ if (this.getMessageListenerInner() instanceof MessageListenerOrderly) {
     this.consumeMessageService =
         new ConsumeMessageConcurrentlyService(this, (MessageListenerConcurrently) this.getMessageListenerInner());
 }
-
-this.consumeMessageService.start();
+this.consumeMessageService.start()
 ```
 ### 结论：
 1,不论是顺序消息还是普通消息，最大消费次数都是maxReconsumeTimes   
@@ -48,7 +48,9 @@ this.consumeMessageService.start();
 3，ConsumeMessageConcurrentlyService使用的是DefaultMQPushConsumerImpl的getMaxReconsumeTimes()   
 4，ConsumeMessageOrderlyService 使用的是自己内部的getMaxReconsumeTimes()   
 5, 从3，4看起来是挺奇怪的一个设计，按理这个既然是两种不同的实现，为何不都放ConsumeMessageService，然后各自实现自己的getMaxReconsumeTimes()呢   
-6，默认情况下maxReconsumeTimes都是-1, 但是普通消息其实maxReconsumeTimes=16; 而且并发消息maxReconsumeTimes= Integer.MAX_VALUE，也就是无限次
+6，默认情况下maxReconsumeTimes都是-1, 但是普通消息其实maxReconsumeTimes=16; 而且并发消息maxReconsumeTimes= Integer.MAX_VALUE，也就是无限次   
+7,如果达到maxReconsumeTimes次消息后，就真的不能再消费到了吗？其实还有DLQ
+
 
 #### 看下两个getMaxReconsumeTimes()的实现  
 首先是ConsumeMessageOrderlyService，这里很明显，如果不配置默认值是-1，也就意味着如果消费失败，会无限次消费重试
