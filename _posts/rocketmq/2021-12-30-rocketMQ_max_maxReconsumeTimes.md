@@ -48,7 +48,7 @@ this.consumeMessageService.start()
 3，ConsumeMessageConcurrentlyService使用的是DefaultMQPushConsumerImpl的getMaxReconsumeTimes()   
 4，ConsumeMessageOrderlyService 使用的是自己内部的getMaxReconsumeTimes()   
 5, 从3，4看起来是挺奇怪的一个设计，按理这个既然是两种不同的实现，为何不都放ConsumeMessageService，然后各自实现自己的getMaxReconsumeTimes()呢   
-6，默认情况下maxReconsumeTimes都是-1, 但是普通消息其实maxReconsumeTimes=16; 而且并发消息maxReconsumeTimes= Integer.MAX_VALUE，也就是无限次   
+6，默认情况下maxReconsumeTimes都是-1, 但是普通消息其实maxReconsumeTimes=16; 而且顺序消息maxReconsumeTimes= Integer.MAX_VALUE，也就是无限次   
 7,如果达到maxReconsumeTimes次消息后，就真的不能再消费到了吗？其实还有DLQ
 
 
