@@ -6,7 +6,7 @@ layout: post
 tags : [rocketmq]
 ---
 
-默认最大次数transactionCheckMax=15，以及间隔时间transactionCheckInterval=60*1000
+默认事务消息最大次数transactionCheckMax=15，以及间隔时间transactionCheckInterval=60*1000
 ```
     /**
      * The maximum number of times the message was checked, if exceed this value, this message will be discarded.
