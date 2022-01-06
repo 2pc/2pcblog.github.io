@@ -1,5 +1,5 @@
 
-## [some notes](http://2pc.github.io/)
+## [Blog&&notes](http://2pc.github.io/)
 
 based on:
 
