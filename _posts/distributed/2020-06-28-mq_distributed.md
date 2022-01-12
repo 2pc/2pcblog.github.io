@@ -13,6 +13,7 @@ tags: ["distributed","事务隔离一致性"]
 
 ###  基于本地消息服务最终一致性方案
 核心： 将业务逻辑与消息记录放在同一个事务里边执行， 业务逻辑执行与消息记录一致。
+[!主要流程图](https://raw.githubusercontent.com/2pc/2pc.github.io/master/_posts/images/13.png)
 
 ### 基于独立消息服务的最终一致性方案
 
