@@ -26,7 +26,7 @@ tags: ["distributed","事务隔离一致性"]
 
 ![主要流程图](https://raw.githubusercontent.com/2pc/2pc.github.io/master/_posts/images/ts.png)
 
-####bad case
+#### bad case
 1. 如果1，2.1出错，本地事务回滚，业务数据，消息都没有变化，啥都没做
 2. 如果2.2 发送失败，定时任务系统会查询消息表，依据状态重新发送
 3. 3-7步骤出错，也没法ack本地消息表，都会重新发送消息
