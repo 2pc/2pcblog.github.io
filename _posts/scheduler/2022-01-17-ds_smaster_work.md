@@ -6,6 +6,9 @@ layout: post
 tags : [Java, File, tools，OOM]
 ---
 ## 1.架构设计
+1.老版本master将任务直接写入zk,Work通过抢占式从zk获取任务，work与master无直接通信交互   
+2.新版master与work直接通信，master通过rpc远程调用将任务下发给work执行
+
 ### 1.1 老版(1.2.1为例)架构
 ![1.2.1设计](https://raw.githubusercontent.com/2pc/2pc.github.io/master/_posts/images/ds2.png)
 
