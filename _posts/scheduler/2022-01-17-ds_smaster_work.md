@@ -115,13 +115,181 @@ public List<String> poll(String key, int tasksNum) {
 ### 2.2 新版任务分发
 #### 2.2.1  master任务分发
 ```
+//CommonTaskProcessor.java
+public boolean dispatchTask() {
+    try {
+        if (taskUpdateQueue == null) {
+            this.initQueue();
+        }
+        if (taskInstance.getState().typeIsFinished()) {
+            logger.info(String.format("submit task , but task [%s] state [%s] is already  finished. ", taskInstance.getName(), taskInstance.getState().toString()));
+            return true;
+        }
+        // task cannot be submitted because its execution state is RUNNING or DELAY.
+        if (taskInstance.getState() == ExecutionStatus.RUNNING_EXECUTION
+                || taskInstance.getState() == ExecutionStatus.DELAY_EXECUTION) {
+            logger.info("submit task, but the status of the task {} is already running or delayed.", taskInstance.getName());
+            return true;
+        }
+        logger.info("task ready to submit: {}", taskInstance);
+
+        TaskPriority taskPriority = new TaskPriority(processInstance.getProcessInstancePriority().getCode(),
+                processInstance.getId(), taskInstance.getProcessInstancePriority().getCode(),
+                taskInstance.getId(), org.apache.dolphinscheduler.common.Constants.DEFAULT_WORKER_GROUP);
+
+        TaskExecutionContext taskExecutionContext = getTaskExecutionContext(taskInstance);
+        taskPriority.setTaskExecutionContext(taskExecutionContext);
+
+        taskUpdateQueue.put(taskPriority);
+        logger.info(String.format("master submit success, task : %s", taskInstance.getName()));
+        return true;
+    } catch (Exception e) {
+        logger.error("submit task error", e);
+        return false;
+    }
+}
+//TaskPriorityQueueImpl
+@Override
+public void put(TaskPriority taskPriorityInfo) throws TaskPriorityQueueException {
+    queue.put(taskPriorityInfo);
+}
+//TaskPriorityQueueConsumer
+private List<TaskPriority> batchDispatch(int fetchTaskNum) throws TaskPriorityQueueException, InterruptedException {
+    List<TaskPriority> failedDispatchTasks = new ArrayList<>();
+    CountDownLatch latch = new CountDownLatch(fetchTaskNum);
+
+    for (int i = 0; i < fetchTaskNum; i++) {
+        TaskPriority taskPriority = taskPriorityQueue.poll(Constants.SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
+        if (Objects.isNull(taskPriority)) {
+            latch.countDown();
+            continue;
+        }
+
+        consumerThreadPoolExecutor.submit(() -> {
+            boolean dispatchResult = this.dispatchTask(taskPriority);
+            if (!dispatchResult) {
+                failedDispatchTasks.add(taskPriority);
+            }
+            latch.countDown();
+        });
+    }
+
+    latch.await();
+
+    return failedDispatchTasks;
+}
+//TaskPriorityQueueImpl
+protected boolean dispatchTask(TaskPriority taskPriority) {
+    boolean result = false;
+    try {
+        TaskExecutionContext context = taskPriority.getTaskExecutionContext();
+        ExecutionContext executionContext = new ExecutionContext(context.toCommand(), ExecutorType.WORKER, context.getWorkerGroup());
+
+        if (isTaskNeedToCheck(taskPriority)) {
+            if (taskInstanceIsFinalState(taskPriority.getTaskId())) {
+                // when task finish, ignore this task, there is no need to dispatch anymore
+                return true;
+            }
+        }
+
+        result = dispatcher.dispatch(executionContext);
+    } catch (ExecuteException e) {
+        logger.error("dispatch error: {}", e.getMessage(), e);
+    }
+    return result;
+}
+```
+再看下这个dispatcher(ExecutorDispatcher),最终会选个一个host通过nettyRemotingClient发送给远程的work执行任务
+```
+public Boolean dispatch(final ExecutionContext context) throws ExecuteException {
+    /**
+     * get executor manager
+     */
+    ExecutorManager<Boolean> executorManager = this.executorManagers.get(context.getExecutorType());
+    if(executorManager == null){
+        throw new ExecuteException("no ExecutorManager for type : " + context.getExecutorType());
+    }
+
+    /**
+     * host select
+     */
+
+    Host host = hostManager.select(context);
+    if (StringUtils.isEmpty(host.getAddress())) {
+        throw new ExecuteException(String.format("fail to execute : %s due to no suitable worker, "
+                        + "current task needs worker group %s to execute",
+                context.getCommand(),context.getWorkerGroup()));
+    }
+    context.setHost(host);
+    executorManager.beforeExecute(context);
+    try {
+        /**
+         * task execute
+         */
+        return executorManager.execute(context);
+    } finally {
+        executorManager.afterExecute(context);
+    }
+}
 
 ```
-#### 2.2.2  master任务分发
+#### 2.2.2  work获取执行任务
+新版的work端处理倒是挺简单的,直接看TaskExecuteProcessor就好了，毕竟再网上一层就是netty的处理机制了,NettyServerHandler
+```
+//TaskExecuteProcessor.java
+public void process(Channel channel, Command command) {
+   //......省略部分代码......
+    this.doAck(taskExecutionContext);
+
+    // submit task to manager
+    if (!workerManager.offer(new TaskExecuteThread(taskExecutionContext, taskCallbackService, alertClientService, taskPluginManager))) {
+        logger.info("submit task to manager error, queue is full, queue size is {}", workerManager.getDelayQueueSize());
+    }
+}
+//WorkerManagerThread.java
+public boolean offer(TaskExecuteThread taskExecuteThread) {
+    return workerExecuteQueue.offer(taskExecuteThread);
+}
+//WorkerManagerThread.java
+public void run() {
+    Thread.currentThread().setName("Worker-Execute-Manager-Thread");
+    TaskExecuteThread taskExecuteThread;
+    while (Stopper.isRunning()) {
+        try {
+            taskExecuteThread = workerExecuteQueue.take();
+            workerExecService.submit(taskExecuteThread);
+        } catch (Exception e) {
+            logger.error("An unexpected interrupt is happened, "
+                + "the exception will be ignored and this thread will continue to run", e);
+        }
+    }
+}
+```
+看下TaskExecuteThread，关键也是run()方法
+```
+public void run() {
+   //......省略部分代码......
+    task = taskChannel.createTask(taskRequest);
+
+    // task init
+    this.task.init();
+
+    //init varPool
+    this.task.getParameters().setVarPool(taskExecutionContext.getVarPool());
+
+    // task handle
+    this.task.handle();
+
+    // task result process
+    if (this.task.getNeedAlert()) {
+        sendAlert(this.task.getTaskAlertInfo());
+    }
+       //......省略部分代码......
+}
+这里的task已经是最终的任务，主要实现有ShellTask,SqlTask,HttpTask,PythonTask,DataXTask,SeaTunnelTask等
 
 
 
 
 ### link
 ![图片来源](https://mp.weixin.qq.com/s/xHviN-2KW7Jwgq5hqhwQSQ)
-
