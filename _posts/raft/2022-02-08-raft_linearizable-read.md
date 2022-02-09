@@ -6,3 +6,11 @@ description: "raft"
 category: "raft"
 tags: ["go","raft"]
 ---
+
+
+
+### ReadIndex
+
+
+### Lease Read
+
