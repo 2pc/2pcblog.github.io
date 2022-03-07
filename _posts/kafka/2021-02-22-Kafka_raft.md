@@ -1,5 +1,5 @@
 ---
-title: Kafka Raft& Kafka 源码合集
+title: Kafka Raft& Kafka3 源码剖析合集
 tagline: ""
 category : kafka
 layout: post
