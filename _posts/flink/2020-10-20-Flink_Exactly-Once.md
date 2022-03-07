@@ -9,7 +9,7 @@ tags : [flink, streamsets, realtime]
 
 source 端
 
-checkpoint后 FlinkKafkaConsumerBase.notifyCheckpointComplete-->fetcher.commitInternalOffsetsToKafka--> AbstractFetcher.doCommitInternalOffsetsToKafka
+checkpoint后 kafka consumer提交offset, FlinkKafkaConsumerBase.notifyCheckpointComplete-->fetcher.commitInternalOffsetsToKafka--> AbstractFetcher.doCommitInternalOffsetsToKafka
 ```
     public final void notifyCheckpointComplete(long checkpointId) throws Exception {
         if (!running) {
