@@ -6,6 +6,7 @@ layout: post
 tags : [flink, streamsets, realtime]
 ---
 
+[Flink CheckPoint](https://gitee.com/beyondbat/notes/blob/master/image/ckp2.png)
 
 生成Graph的时候，依据checkpoint的配置，会注册一个JobStatusListener，
 ```
