@@ -199,8 +199,15 @@ if (executionState == ExecutionState.RUNNING && invokable != null) {
 这里的invokable可以是StreamTask，SourceStreamTask，这两其实最终调用的是一个，因为子类调用super.triggerCheckpointAsync
 
 ```
-//SourceStreamTask.triggerCheckpointAsync-->StreamTask.triggerCheckpointAsyn-->StreamTask.triggerCheckpoint-->StreamTask.performCheckpoint--》subtaskCheckpointCoordinator.checkpointState-->operatorChain.prepareSnapshotPreBarrier-->operatorChain.broadcastEvent(CheckpointBarrier)-->subtaskCheckpointCoordinator-->takeSnapshotSync-->operatorChain.snapshotState()-->subtaskCheckpointCoordinator.finishAndReportAsync-->AsyncCheckpointRunnable.reportCompletedSnapshotStates--> TaskStateManagerImpl.reportTaskStateSnapshots-->checkpointResponder.acknowledgeCheckpoint-->checkpointCoordinatorGateway.acknowledgeCheckpoint-->
-JobMaster.acknowledgeCheckpoint-->executionGraphHandler.acknowledgeCheckpoint-->coordinator.receiveAcknowledgeMessage-->coordinator.completePendingCheckpoint-->coordinator.sendAcknowledgeMessages-->ee.notifyCheckpointComplete--> coordinatorContext.notifyCheckpointComplete(checkpointId);
+//SourceStreamTask.triggerCheckpointAsync-->StreamTask.triggerCheckpointAsyn-->StreamTask.triggerCheckpoint
+-->StreamTask.performCheckpoint--》subtaskCheckpointCoordinator.checkpointState-->operatorChain.prepareSnapshotPreBarrier
+-->operatorChain.broadcastEvent(CheckpointBarrier)-->subtaskCheckpointCoordinator-->takeSnapshotSync
+-->operatorChain.snapshotState()-->subtaskCheckpointCoordinator.finishAndReportAsync
+-->AsyncCheckpointRunnable.reportCompletedSnapshotStates--> TaskStateManagerImpl.reportTaskStateSnapshots
+-->checkpointResponder.acknowledgeCheckpoint-->checkpointCoordinatorGateway.acknowledgeCheckpoint
+-->JobMaster.acknowledgeCheckpoint-->executionGraphHandler.acknowledgeCheckpoint
+-->coordinator.receiveAcknowledgeMessage-->coordinator.completePendingCheckpoint
+-->coordinator.sendAcknowledgeMessages-->ee.notifyCheckpointComplete--> coordinatorContext.notifyCheckpointComplete(checkpointId);
 ```
 最新版的都抽到SubtaskCheckpointCoordinator里了
 
