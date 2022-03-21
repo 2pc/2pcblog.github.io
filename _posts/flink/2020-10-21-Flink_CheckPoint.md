@@ -197,18 +197,18 @@ if (executionState == ExecutionState.RUNNING && invokable != null) {
 }
 ```
 这里的invokable可以是StreamTask，SourceStreamTask，这两其实最终调用的是一个，因为子类调用super.triggerCheckpointAsync
+主要流程
 
-```
-//SourceStreamTask.triggerCheckpointAsync-->StreamTask.triggerCheckpointAsyn-->StreamTask.triggerCheckpoint
--->StreamTask.performCheckpoint--》subtaskCheckpointCoordinator.checkpointState-->operatorChain.prepareSnapshotPreBarrier
--->operatorChain.broadcastEvent(CheckpointBarrier)-->subtaskCheckpointCoordinator-->takeSnapshotSync
--->operatorChain.snapshotState()-->subtaskCheckpointCoordinator.finishAndReportAsync
--->AsyncCheckpointRunnable.reportCompletedSnapshotStates--> TaskStateManagerImpl.reportTaskStateSnapshots
--->checkpointResponder.acknowledgeCheckpoint-->checkpointCoordinatorGateway.acknowledgeCheckpoint
--->JobMaster.acknowledgeCheckpoint-->executionGraphHandler.acknowledgeCheckpoint
--->coordinator.receiveAcknowledgeMessage-->coordinator.completePendingCheckpoint
--->coordinator.sendAcknowledgeMessages-->ee.notifyCheckpointComplete--> coordinatorContext.notifyCheckpointComplete(checkpointId);
-```
+1. -->SourceStreamTask.triggerCheckpointAsync-->StreamTask.triggerCheckpointAsyn-->StreamTask.triggerCheckpoint
+2. -->StreamTask.performCheckpoint--》subtaskCheckpointCoordinator.checkpointState-->operatorChain.prepareSnapshotPreBarrier
+3. -->operatorChain.broadcastEvent(CheckpointBarrier)-->subtaskCheckpointCoordinator-->takeSnapshotSync
+4. -->operatorChain.snapshotState()-->subtaskCheckpointCoordinator.finishAndReportAsync
+5. -->AsyncCheckpointRunnable.reportCompletedSnapshotStates--> TaskStateManagerImpl.reportTaskStateSnapshots
+6. -->checkpointResponder.acknowledgeCheckpoint-->checkpointCoordinatorGateway.acknowledgeCheckpoint
+7. -->JobMaster.acknowledgeCheckpoint-->executionGraphHandler.acknowledgeCheckpoint
+8. -->coordinator.receiveAcknowledgeMessage-->coordinator.completePendingCheckpoint
+9. -->coordinator.sendAcknowledgeMessages-->ee.notifyCheckpointComplete--> coordinatorContext.notifyCheckpointComplete(checkpointId);
+
 最新版的都抽到SubtaskCheckpointCoordinator里了
 
 ```
